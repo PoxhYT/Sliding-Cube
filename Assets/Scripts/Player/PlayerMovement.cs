@@ -1,32 +1,43 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
     public Rigidbody rb;
     public float forceSpeed = 500;
+    public Text score;
+
+    private StartCountdown startCountdown = new StartCountdown();
 
     // Start is called before the first frame update
     void Start()
     {
-        //TODO create UI with start timer
+        startCountdown.currentTime = startCountdown.start;
     }
 
     private void Update()
     {
-        StartCountdown startCountdown = new StartCountdown();
-        if(startCountdown.isReadyToStart())
-        {
-                             
-        }
+        startCountdown.ChangeGravityState(rb, score);
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        AddForceToRigidbody(0, 0, forceSpeed * Time.deltaTime);
-        SetupControlls();
+        startGame();    
+    }
+
+    public void startGame()
+    {
+        Debug.Log("IsGravityEnabled: " + rb.useGravity);
+
+        if (rb.useGravity)
+        {
+            rb.useGravity = true;
+            AddForceToRigidbody(0, 0, forceSpeed * Time.deltaTime);
+            SetupControlls();
+        } 
     }
 
     private void AddForceToRigidbody(float valueA, float valueB, float valueC)

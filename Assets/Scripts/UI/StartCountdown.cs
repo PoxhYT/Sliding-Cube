@@ -6,30 +6,28 @@ using UnityEngine.UI;
 public class StartCountdown : MonoBehaviour
 {
 
-    private float start = 5f;
-    private float currentTime = 0f;
-    public Text score;
+    public float start = 3f;
+    public float currentTime = 0f;
 
-    // Start is called before the first frame update
-    void Start()
+    public void ChangeGravityState(Rigidbody rigidbody, Text score)
     {
-        currentTime = start;    
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if(!isReadyToStart())
+        if (!isReadyToStart())
         {
+            rigidbody.useGravity = false;
+            score.enabled = true;
             currentTime -= 1 * Time.deltaTime;
             score.text = currentTime.ToString("0");
+        }
+        else
+        {
+            score.enabled = false;
+            rigidbody.useGravity = true;
         }
     }
 
     public bool isReadyToStart()
     {
-        if (currentTime == 0) return true;
-        return false;
+        return currentTime < 0;
     }
 
 }
