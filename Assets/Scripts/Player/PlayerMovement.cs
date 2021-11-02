@@ -10,8 +10,7 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("Programm starts!");
-        Debug.Log("Position: " + rb.position);
+        //TODO create UI with start timer
     }
 
     // Update is called once per frame
@@ -39,7 +38,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private float getPlayersCurrentSpeed()
+    private float GetPlayersCurrentSpeed()
     {
         Vector3 playersVelocity = rb.velocity;      
         return playersVelocity.magnitude;
