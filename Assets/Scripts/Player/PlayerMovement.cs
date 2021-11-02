@@ -13,6 +13,15 @@ public class PlayerMovement : MonoBehaviour
         //TODO create UI with start timer
     }
 
+    private void Update()
+    {
+        StartCountdown startCountdown = new StartCountdown();
+        if(startCountdown.isReadyToStart())
+        {
+                             
+        }
+    }
+
     // Update is called once per frame
     void FixedUpdate()
     {
