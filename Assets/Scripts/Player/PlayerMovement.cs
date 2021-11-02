@@ -31,11 +31,17 @@ public class PlayerMovement : MonoBehaviour
     {
         if (Input.GetKey("d"))
         {
-            AddForceToRigidbody(1000 * Time.deltaTime, 0, 0);
+            rb.AddForce(50 * Time.deltaTime, 0, 0, ForceMode.VelocityChange);
         }
         else if (Input.GetKey("a"))
         {
-            AddForceToRigidbody(-1000 * Time.deltaTime, 0, 0);
+            rb.AddForce(-50 * Time.deltaTime, 0, 0, ForceMode.VelocityChange);
         }
+    }
+
+    private float getPlayersCurrentSpeed()
+    {
+        Vector3 playersVelocity = rb.velocity;      
+        return playersVelocity.magnitude;
     }
 }

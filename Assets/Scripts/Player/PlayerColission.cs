@@ -6,7 +6,7 @@ public class PlayerColission : MonoBehaviour
 {
     private void OnCollisionEnter(Collision collision)
     {
-        if(ColissionWithObstacle(collision.collider.name))
+        if(ColissionWithObstacle(collision.collider.tag))
         {
             Debug.Log("You lost!");
         }          
