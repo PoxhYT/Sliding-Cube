@@ -34,8 +34,6 @@ public class PlayerMovement : MonoBehaviour
 
     public void startGame()
     {
-        Debug.Log("IsGameDone: " + !playerColission.gameEnd);
-
         if (!playerColission.gameEnd)
         {
             if (rb.useGravity)
