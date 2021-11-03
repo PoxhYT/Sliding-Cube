@@ -4,11 +4,15 @@ using UnityEngine;
 
 public class PlayerColission : MonoBehaviour
 {
+    public GameObject player;
+    public bool gameEnd = false;
+
     private void OnCollisionEnter(Collision collision)
     {
         if(ColissionWithObstacle(collision.collider.tag))
         {
-            Debug.Log("You lost!");
+            gameEnd = true;
+            player.gameObject.SetActive(false);
         }          
     }
 

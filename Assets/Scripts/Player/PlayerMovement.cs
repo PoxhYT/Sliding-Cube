@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
     public Text score;
 
     private StartCountdown startCountdown = new StartCountdown();
+    private PlayerColission playerColission = new PlayerColission();
 
     // Start is called before the first frame update
     void Start()
@@ -19,7 +20,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        startCountdown.ChangeGravityState(rb, score);
+        if(!playerColission.gameEnd)
+        {
+            startCountdown.ChangeGravityState(rb, score);
+        }
     }
 
     // Update is called once per frame
@@ -30,14 +34,20 @@ public class PlayerMovement : MonoBehaviour
 
     public void startGame()
     {
-        Debug.Log("IsGravityEnabled: " + rb.useGravity);
+        Debug.Log("IsGameDone: " + !playerColission.gameEnd);
 
-        if (rb.useGravity)
+        if (!playerColission.gameEnd)
         {
-            rb.useGravity = true;
-            AddForceToRigidbody(0, 0, forceSpeed * Time.deltaTime);
-            SetupControlls();
-        } 
+            if (rb.useGravity)
+            {
+                rb.useGravity = true;
+                AddForceToRigidbody(0, 0, forceSpeed * Time.deltaTime);
+                SetupControlls();
+            }
+        } else
+        {
+            Debug.Log("HELLO!!!!!!");
+        }
     }
 
     private void AddForceToRigidbody(float valueA, float valueB, float valueC)

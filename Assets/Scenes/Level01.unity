@@ -1064,7 +1064,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d7dd2916357c574f9b26dbd204883ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  score: {fileID: 1153184754}
+  start: 3
+  currentTime: 0
 --- !u!114 &615354842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3421,7 +3422,7 @@ GameObject:
   - component: {fileID: 2058673689}
   m_Layer: 0
   m_Name: player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3532,6 +3533,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 2058673683}
   forceSpeed: 800
+  score: {fileID: 1153184754}
 --- !u!114 &2058673689
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3544,6 +3546,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0842946d9f39a14aa6f83e4ff1e41fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 2058673682}
+  gameEnd: 1
 --- !u!1 &2069498480
 GameObject:
   m_ObjectHideFlags: 0
