@@ -12,7 +12,6 @@ public class PlayerMovement : MonoBehaviour
     private StartCountdown startCountdown = new StartCountdown();
     private PlayerColission playerColission = new PlayerColission();
 
-    // Start is called before the first frame update
     void Start()
     {
         startCountdown.currentTime = startCountdown.start;

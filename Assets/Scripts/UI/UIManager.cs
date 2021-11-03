@@ -5,8 +5,15 @@ using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
+    public GameObject LevelCompleted;
+
     public void restartGame()
     {
-        SceneManager.LoadScene("Level01");
+        SceneManager.LoadScene("LEVEL-01-FOREST");
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        LevelCompleted.gameObject.SetActive(true);
     }
 }
