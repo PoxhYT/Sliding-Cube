@@ -9,12 +9,17 @@ public class PlayerMovement : MonoBehaviour
     public float forceSpeed = 500;
     public Text score;
 
+    public Transform endPosition;
+
     private StartCountdown startCountdown = new StartCountdown();
     private PlayerColission playerColission = new PlayerColission();
+
+    private float fullDistance;
 
     void Start()
     {
         startCountdown.currentTime = startCountdown.start;
+        fullDistance = GetDistance();
     }
 
     private void Update()
@@ -28,7 +33,8 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        startGame();    
+        startGame();
+        GetCurrentProgress();
     }
 
     public void startGame()
@@ -65,9 +71,19 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private float GetPlayersCurrentSpeed()
+    private float GetDistance()
     {
-        Vector3 playersVelocity = rb.velocity;      
-        return playersVelocity.magnitude;
+        return Vector3.Distance(transform.position, endPosition.position);
+    }
+
+    private float GetCurrentProgress()
+    {
+        if (rb.transform.position.z <= endPosition.position.z)
+        {
+            float newDistance = GetDistance();
+            float progress = Mathf.InverseLerp(fullDistance, 0f, newDistance);
+            return progress;
+        }
+        return 100.0f;
     }
 }
