@@ -4,15 +4,19 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public GameObject Player;
+    public GameObject LevelNotCompleted;
 
-    // Update is called once per frame
-    void Update()
+    [HideInInspector]
+    public bool GameHasEnded = false;
+
+    public void EndGame()
     {
-        
+        if(!GameHasEnded)
+        {
+            GameHasEnded = true;
+            Player.gameObject.SetActive(false);
+            LevelNotCompleted.SetActive(true);
+        }
     }
 }
