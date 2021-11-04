@@ -74,4 +74,20 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
+
+    public float GetDistance(Rigidbody player, Transform endPosition)
+    {
+        return Vector3.Distance(player.position, endPosition.position);
+    }
+
+    public float GetCurrentProgress(Rigidbody player, Transform endPosition, float fullDistance)
+    {
+        if (player.transform.position.z <= endPosition.position.z)
+        {
+            float newDistance = GetDistance(player, endPosition);
+            float progress = Mathf.InverseLerp(fullDistance, 0f, newDistance);
+            return Mathf.Round(progress * 100);
+        }
+        return 100.0f;
+    }
 }

@@ -20,7 +20,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         gameManager.SetCountdown();
-        fullDistance = GetDistance();
+        fullDistance = gameManager.GetDistance(rb, endPosition);
     }
 
     private void Update()
@@ -35,7 +35,7 @@ public class PlayerMovement : MonoBehaviour
     void FixedUpdate()
     {
         startGame();
-        progress.text = GetCurrentProgress().ToString() + "%";
+        progress.text = gameManager.GetCurrentProgress(rb, endPosition, fullDistance).ToString() + "%";
 
         if(rb.position.y < 0)
         {
@@ -72,21 +72,5 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.AddForce(-50 * Time.deltaTime, 0, 0, ForceMode.VelocityChange);
         }
-    }
-
-    private float GetDistance()
-    {
-        return Vector3.Distance(transform.position, endPosition.position);
-    }
-
-    private float GetCurrentProgress()
-    {
-        if (rb.transform.position.z <= endPosition.position.z)
-        {
-            float newDistance = GetDistance();
-            float progress = Mathf.InverseLerp(fullDistance, 0f, newDistance);
-            return Mathf.Round(progress * 100);
-        }
-        return 100.0f;
     }
 }
