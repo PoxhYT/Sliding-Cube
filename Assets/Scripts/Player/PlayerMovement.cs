@@ -36,6 +36,11 @@ public class PlayerMovement : MonoBehaviour
     {
         startGame();
         progress.text = GetCurrentProgress().ToString() + "%";
+
+        if(rb.position.y < 0)
+        {
+            gameManager.EndGame();
+        }
     }
 
     public void startGame()
