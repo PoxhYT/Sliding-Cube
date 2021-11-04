@@ -11,9 +11,4 @@ public class UIManager : MonoBehaviour
     {
         SceneManager.LoadScene("LEVEL-01-FOREST");
     }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        LevelCompleted.gameObject.SetActive(true);
-    }
 }
