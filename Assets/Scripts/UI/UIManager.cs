@@ -5,10 +5,33 @@ using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
-    public GameObject LevelCompleted;
+    public GameObject Transition;
+    public GameObject MainMenu;
+    public GameObject SelectionMenu;
 
-    public void restartGame()
+    private bool isInMainMenu = true;
+
+    private void Update()
     {
-        SceneManager.LoadScene("LEVEL-01-FOREST");
+        if(isInMainMenu)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                GoToSelectionMenu();
+            }
+        }
+    }
+
+    public void GoToSelectionMenu()
+    {
+        StartCoroutine(StartTransition(SelectionMenu));    
+    }
+
+    public IEnumerator StartTransition(GameObject TargetMenu)
+    {
+        Transition.SetActive(true);
+        yield return new WaitForSecondsRealtime(2);
+        MainMenu.SetActive(false);
+        TargetMenu.SetActive(true);
     }
 }
