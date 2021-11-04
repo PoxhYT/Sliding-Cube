@@ -31,16 +31,26 @@ public class GameManager : MonoBehaviour
     {
         if (!isReadyToStart())
         {
-            rigidbody.useGravity = false;
-            score.enabled = true;
-            currentTime -= 1 * Time.deltaTime;
-            score.text = currentTime.ToString("0");
+            SetupCountdown(rigidbody, score);
         }
         else
         {
             score.enabled = false;
             rigidbody.useGravity = true;
         }
+    }
+
+    private void SetupCountdown(Rigidbody rigidbody, Text score)
+    {
+        rigidbody.useGravity = false;
+        score.enabled = true;
+        currentTime -= 1 * Time.deltaTime;
+        score.text = currentTime.ToString("0");
+    }
+
+    private void SetCountdown()
+    {
+        currentTime = start;
     }
 
     public bool isReadyToStart()
