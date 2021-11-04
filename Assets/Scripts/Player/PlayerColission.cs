@@ -11,7 +11,12 @@ public class PlayerColission : MonoBehaviour
         {
             FindObjectOfType<GameManager>().EndGame();
         }          
-    }  
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        StartCoroutine(FindObjectOfType<GameManager>().FinishGame());
+    }
 
     private bool ColissionWithObstacle(string colissionName)
     {

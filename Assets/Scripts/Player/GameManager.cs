@@ -28,6 +28,17 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public IEnumerator FinishGame()
+    {
+        if (!GameHasEnded)
+        {
+            GameHasEnded = true;
+            LevelCompleted.SetActive(true);
+            yield return new WaitForSecondsRealtime(1);
+            Player.gameObject.SetActive(false);
+        }
+    }
+
     public void ChangeGravityState(Rigidbody rigidbody, Text score)
     {
         if (!isReadyToStart())
