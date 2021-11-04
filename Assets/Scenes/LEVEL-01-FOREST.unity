@@ -5058,6 +5058,7 @@ MonoBehaviour:
   rb: {fileID: 2058673683}
   forceSpeed: 800
   score: {fileID: 1153184754}
+  endPosition: {fileID: 154278306}
 --- !u!114 &2058673689
 MonoBehaviour:
   m_ObjectHideFlags: 0

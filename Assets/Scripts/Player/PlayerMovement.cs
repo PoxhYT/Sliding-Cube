@@ -34,7 +34,7 @@ public class PlayerMovement : MonoBehaviour
     void FixedUpdate()
     {
         startGame();
-        GetCurrentProgress();
+        Debug.Log("Percentage: " + GetCurrentProgress());
     }
 
     public void startGame()
@@ -82,7 +82,7 @@ public class PlayerMovement : MonoBehaviour
         {
             float newDistance = GetDistance();
             float progress = Mathf.InverseLerp(fullDistance, 0f, newDistance);
-            return progress;
+            return Mathf.Round(progress * 100);
         }
         return 100.0f;
     }
