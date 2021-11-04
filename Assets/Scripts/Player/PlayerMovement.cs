@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour
     public Rigidbody rb;
     public float forceSpeed = 500;
     public Text score;
+    public Text progress;
 
     public Transform endPosition;
 
@@ -34,7 +35,7 @@ public class PlayerMovement : MonoBehaviour
     void FixedUpdate()
     {
         startGame();
-        Debug.Log("Percentage: " + GetCurrentProgress());
+        progress.text = GetCurrentProgress().ToString() + "%";
     }
 
     public void startGame()
