@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
 {
     public GameObject Player;
     public GameObject LevelNotCompleted;
+    public GameObject LevelCompleted;
 
     [HideInInspector]
     public bool GameHasEnded = false;
@@ -48,7 +49,7 @@ public class GameManager : MonoBehaviour
         score.text = currentTime.ToString("0");
     }
 
-    private void SetCountdown()
+    public void SetCountdown()
     {
         currentTime = start;
     }

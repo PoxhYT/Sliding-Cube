@@ -6,28 +6,28 @@ using UnityEngine.UI;
 public class PlayerMovement : MonoBehaviour
 {
     public Rigidbody rb;
-    public float forceSpeed = 500;
+    
     public Text score;
     public Text progress;
 
+    public GameManager gameManager;
+
     public Transform endPosition;
 
-    private StartCountdown startCountdown = new StartCountdown();
-    private PlayerColission playerColission = new PlayerColission();
-
+    public float forceSpeed = 500;
     private float fullDistance;
 
     void Start()
     {
-        startCountdown.currentTime = startCountdown.start;
+        gameManager.SetCountdown();
         fullDistance = GetDistance();
     }
 
     private void Update()
     {
-        if(!playerColission.gameEnd)
+        if(!gameManager.GameHasEnded)
         {
-            startCountdown.ChangeGravityState(rb, score);
+            gameManager.ChangeGravityState(rb, score);
         }
     }
 
@@ -40,7 +40,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void startGame()
     {
-        if (!playerColission.gameEnd)
+        if (!gameManager.GameHasEnded)
         {
             if (rb.useGravity)
             {
@@ -48,9 +48,6 @@ public class PlayerMovement : MonoBehaviour
                 AddForceToRigidbody(0, 0, forceSpeed * Time.deltaTime);
                 SetupControlls();
             }
-        } else
-        {
-            Debug.Log("HELLO!!!!!!");
         }
     }
 

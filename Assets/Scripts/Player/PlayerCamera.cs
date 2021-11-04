@@ -6,14 +6,14 @@ public class PlayerCamera : MonoBehaviour
 {
 
     public Transform player;
-    public Vector3 offset = new Vector3(0, 1, -5);
-    private PlayerColission playerColission = new PlayerColission();
+    private Vector3 offset = new Vector3(0, 1, -5);
+
+    public GameManager gameManager;
 
     // Update is called once per frame
     void Update()
     {
-
-        if (!playerColission.gameEnd) {
+        if (!gameManager.GameHasEnded) {
             transform.position = player.position + offset;
         }  
     }
