@@ -18,6 +18,8 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public float currentTime = 0f;
 
+    public List<GameObject> gameObjects = new List<GameObject>();
+
     public void EndGame()
     {
         if(!GameHasEnded)
@@ -89,5 +91,22 @@ public class GameManager : MonoBehaviour
             return Mathf.Round(progress * 100);
         }
         return 100.0f;
+    }
+
+    public void UnloadChunck(Rigidbody player)
+    {
+        for (int i = 0; i < gameObjects.Count; i++)
+        {
+            GameObject gameObject = gameObjects[i];
+
+            float positionGameObject = Mathf.Round(gameObject.transform.position.z);
+            float positionPlayer = Mathf.Round(player.transform.position.z);
+
+            if (positionGameObject + 5 < positionPlayer)
+            {
+                Destroy(gameObject);
+                gameObjects.Remove(gameObject);
+            }
+        }
     }
 }
