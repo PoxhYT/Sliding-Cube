@@ -10,6 +10,7 @@ public class UIManager : MonoBehaviour
     public GameObject SelectionMenu;
 
     private bool isInMainMenu = true;
+    private bool isInSelectionMenu = false;
 
     private void Update()
     {
@@ -20,6 +21,22 @@ public class UIManager : MonoBehaviour
                 GoToSelectionMenu();
             }
         }
+
+        if(isInSelectionMenu)
+        {
+            if(SceneManager.GetActiveScene().name == "MainScreen")
+            {
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    StartGame();
+                }
+            }
+        }
+    }
+
+    public void StartGame()
+    {
+        SceneManager.LoadScene("LEVEL-01-FOREST");
     }
 
     public void GoToSelectionMenu()
@@ -33,5 +50,6 @@ public class UIManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(2);
         MainMenu.SetActive(false);
         TargetMenu.SetActive(true);
+        isInSelectionMenu = true;
     }
 }

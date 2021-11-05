@@ -7,15 +7,19 @@ public class PlayerColission : MonoBehaviour
 {
     private void OnCollisionEnter(Collision collision)
     {
-        if(ColissionWithObstacle(collision.collider.tag))
+        if (ColissionWithObstacle(collision.collider.tag))
         {
+            Debug.Log("DED");
             FindObjectOfType<GameManager>().EndGame();
         }          
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        StartCoroutine(FindObjectOfType<GameManager>().FinishGame());
+        if(other.name == "END")
+        {
+            StartCoroutine(FindObjectOfType<GameManager>().FinishGame());
+        }
     }
 
     private bool ColissionWithObstacle(string colissionName)

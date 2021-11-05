@@ -429,7 +429,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf87c058b02c26b47ab51b332a1f8c9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LevelCompleted: {fileID: 1095416355}
+  Transition: {fileID: 0}
+  MainMenu: {fileID: 0}
+  SelectionMenu: {fileID: 0}
 --- !u!1001 &156886908
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2338,7 +2340,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf87c058b02c26b47ab51b332a1f8c9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LevelCompleted: {fileID: 0}
+  Transition: {fileID: 0}
+  MainMenu: {fileID: 0}
+  SelectionMenu: {fileID: 0}
 --- !u!4 &809892586
 Transform:
   m_ObjectHideFlags: 0
@@ -3824,9 +3828,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 809892585}
-        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: restartGame
+      - m_Target: {fileID: 1135095799}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: RestartGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
