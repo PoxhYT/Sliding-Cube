@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
@@ -11,6 +13,7 @@ public class UIManager : MonoBehaviour
 
     private bool isInMainMenu = true;
     private bool isInSelectionMenu = false;
+    private bool isLoadingGame = false;
 
     private void Update()
     {
@@ -32,6 +35,7 @@ public class UIManager : MonoBehaviour
                 }
             }
         }
+        SelectLevel();
     }
 
     public void StartGame()
@@ -51,5 +55,28 @@ public class UIManager : MonoBehaviour
         MainMenu.SetActive(false);
         TargetMenu.SetActive(true);
         isInSelectionMenu = true;
+        yield return new WaitForSecondsRealtime(1);
+        Transition.SetActive(false);
+    }
+
+    private void LoadGame(GameObject level)
+    {
+        if (!isLoadingGame)
+        {
+            SceneManager.LoadScene(level.name);
+            isLoadingGame = true;
+        }
+    }
+
+    public void SelectLevel()
+    {
+        Button[] levels = Button.FindObjectsOfType<Button>();
+        foreach (Button level in levels)
+        {
+            level.onClick.AddListener(() =>
+            {
+                LoadGame(level.gameObject);
+            });
+        }
     }
 }

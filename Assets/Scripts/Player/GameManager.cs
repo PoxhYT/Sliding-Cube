@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -21,6 +22,8 @@ public class GameManager : MonoBehaviour
     public List<GameObject> gameObjects = new List<GameObject>();
     [HideInInspector]
     public List<GameObject> obstacles = new List<GameObject>();
+    [HideInInspector]
+    public List<Button> levelList = new List<Button>();
 
     public void EndGame() 
     {
