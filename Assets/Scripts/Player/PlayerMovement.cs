@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
@@ -30,6 +31,7 @@ public class PlayerMovement : MonoBehaviour
             gameManager.ChangeGravityState(rb, score);
         }
         gameManager.UnloadChunck(rb);
+        gameManager.SetupObstacle();
     }
 
     // Update is called once per frame

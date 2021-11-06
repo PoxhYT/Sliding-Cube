@@ -19,8 +19,10 @@ public class GameManager : MonoBehaviour
     public float currentTime = 0f;
 
     public List<GameObject> gameObjects = new List<GameObject>();
+    [HideInInspector]
+    public List<GameObject> obstacles = new List<GameObject>();
 
-    public void EndGame()
+    public void EndGame() 
     {
         if(!GameHasEnded)
         {
@@ -106,6 +108,21 @@ public class GameManager : MonoBehaviour
             {
                 Destroy(gameObject);
                 gameObjects.Remove(gameObject);
+            }
+        }
+    }
+
+    public void SetupObstacle()
+    {
+        GameObject[] gameObjects = GameObject.FindObjectsOfType<GameObject>();
+        foreach (GameObject gameObject in gameObjects)
+        {
+            if(gameObject.name.Contains("Obstacle"))
+            {
+                if(!obstacles.Contains(gameObject))
+                {
+                    gameObject.tag = "Obstacle";
+                }
             }
         }
     }
