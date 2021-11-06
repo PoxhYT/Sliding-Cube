@@ -109,6 +109,23 @@ public class GameManager : MonoBehaviour
                 Destroy(gameObject);
                 gameObjects.Remove(gameObject);
             }
+
+            UnloadObstacles(positionPlayer);
+        }
+    }
+
+    private void UnloadObstacles(float positionPlayer)
+    {
+        for (int k = 0; k < obstacles.Count; k++)
+        {
+            GameObject obstacle = obstacles[k];
+            float positionObstacle = obstacle.transform.position.z + 10;
+
+            if (positionObstacle < positionPlayer)
+            {
+                Destroy(obstacle);
+                obstacles.Remove(obstacle);
+            }
         }
     }
 
@@ -122,6 +139,7 @@ public class GameManager : MonoBehaviour
                 if(!obstacles.Contains(gameObject))
                 {
                     gameObject.tag = "Obstacle";
+                    obstacles.Add(gameObject);
                 }
             }
         }

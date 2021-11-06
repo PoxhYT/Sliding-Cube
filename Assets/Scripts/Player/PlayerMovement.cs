@@ -30,8 +30,9 @@ public class PlayerMovement : MonoBehaviour
         {
             gameManager.ChangeGravityState(rb, score);
         }
-        gameManager.UnloadChunck(rb);
+
         gameManager.SetupObstacle();
+        gameManager.UnloadChunck(rb);
     }
 
     // Update is called once per frame
