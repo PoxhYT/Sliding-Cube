@@ -35,14 +35,11 @@ public class FirebaseManager : MonoBehaviour
         });
     }
 
-    private bool IsUserInDatabase(string username)
-    {
-        return GetUser(username) == null;
-    }
-
     public async void AddUserToDatabase()
     {
-        if (!IsUserInDatabase(username.text))
+        var UserInDatabase = await IsUserInDatabase(username.text);
+
+        if (!UserInDatabase)
         {
             User user = new User(username.text, new List<string>());
             user.finishedLevel.Add("LEVEL-01-FOREST");
@@ -57,9 +54,6 @@ public class FirebaseManager : MonoBehaviour
             {
                 Debug.Log("Error: " + e);
             }
-        } else
-        {
-            Debug.Log("NOOOOOOOOOOO");
         }
     }
 
@@ -67,20 +61,36 @@ public class FirebaseManager : MonoBehaviour
     {
         var task = await reference.Child("users").Child(username).GetValueAsync();
 
-        User user = null;
 
         DataSnapshot snapshot = task;
-        if (snapshot.Child("username").Value != null)
+
+        var UserExist = await IsUserInDatabase(username);
+
+        if(UserExist)
         {
-            user = new User(username, new List<string>());
+            User user = new User(username, new List<string>());
 
             foreach (var level in snapshot.Child("finishedLevel").Children)
             {
                 user.finishedLevel.Add(level.Value.ToString());
-                Debug.Log("Level: " + level.Value.ToString());
-                Debug.Log("Count: " + user.finishedLevel.Count);
             }
+            Debug.Log("User exist!");
+            return user;
+        } else
+        {
+            Debug.Log("User is null!");
+            return null;
         }
-        return user;
     } 
+
+    private async Task<bool> IsUserInDatabase(string username)
+    {
+        var task = await reference.Child("users").Child(username).GetValueAsync();
+
+        DataSnapshot snapshot = task;
+
+        Debug.Log("Snapshot: " + snapshot.Child("username"));
+
+        return snapshot.Child("username").Value != null;
+    }
 }
