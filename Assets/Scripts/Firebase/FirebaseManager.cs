@@ -41,8 +41,9 @@ public class FirebaseManager : MonoBehaviour
 
         if (!UserInDatabase)
         {
-            User user = new User(username.text, new List<string>());
+            User user = new User(username.text, new List<string>(), new List<SkinInfo>());
             user.finishedLevel.Add("LEVEL-01-FOREST");
+            user.skins.Add(new SkinInfo("RED-CUBE", 0, true));
             string json = JsonUtility.ToJson(user);
 
             try
@@ -57,6 +58,11 @@ public class FirebaseManager : MonoBehaviour
         }
     }
 
+    public async void test()
+    {
+        await GetUser(username.text);
+    }
+
     private async Task<User> GetUser(string username)
     {
         var task = await reference.Child("users").Child(username).GetValueAsync();
@@ -68,13 +74,7 @@ public class FirebaseManager : MonoBehaviour
 
         if(UserExist)
         {
-            User user = new User(username, new List<string>());
-
-            foreach (var level in snapshot.Child("finishedLevel").Children)
-            {
-                user.finishedLevel.Add(level.Value.ToString());
-            }
-            Debug.Log("User exist!");
+            var user = JsonUtility.FromJson<User>(snapshot.GetRawJsonValue());
             return user;
         } else
         {
@@ -86,11 +86,7 @@ public class FirebaseManager : MonoBehaviour
     private async Task<bool> IsUserInDatabase(string username)
     {
         var task = await reference.Child("users").Child(username).GetValueAsync();
-
         DataSnapshot snapshot = task;
-
-        Debug.Log("Snapshot: " + snapshot.Child("username"));
-
         return snapshot.Child("username").Value != null;
     }
 }
