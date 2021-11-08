@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "465683424807",
+    "firebase_url": "https://sliding-cube-346b2-default-rtdb.firebaseio.com/",
+    "project_id": "sliding-cube-346b2",
+    "storage_bucket": "sliding-cube-346b2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:465683424807:android:a401540a2d144ae135d002",
+        "android_client_info": {
+          "package_name": "com.poxh.SlidingCube"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "465683424807-86h4lgodukjoqarurgch3u6j9nnetr2i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAytfUO9nAwRu4sQmMloWCrhWKu5FbMYaI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "465683424807-86h4lgodukjoqarurgch3u6j9nnetr2i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

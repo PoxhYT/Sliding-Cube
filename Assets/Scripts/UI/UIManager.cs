@@ -17,7 +17,7 @@ public class UIManager : MonoBehaviour
 
     private void Update()
     {
-        if(isInMainMenu)
+        if (isInMainMenu)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -25,9 +25,9 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        if(isInSelectionMenu)
+        if (isInSelectionMenu)
         {
-            if(SceneManager.GetActiveScene().name == "MainScreen")
+            if (SceneManager.GetActiveScene().name == "MainScreen")
             {
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
@@ -45,7 +45,7 @@ public class UIManager : MonoBehaviour
 
     public void GoToSelectionMenu()
     {
-        StartCoroutine(StartTransition(SelectionMenu));    
+        StartCoroutine(StartTransition(SelectionMenu));
     }
 
     public IEnumerator StartTransition(GameObject TargetMenu)
