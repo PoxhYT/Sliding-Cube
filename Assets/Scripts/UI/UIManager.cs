@@ -19,6 +19,7 @@ public class UIManager : MonoBehaviour
 
     private GameObject CurrentGameObject;
     public GameObject LevelSelection;
+    public GameObject ItemShop;
 
     public FirebaseManager firebaseManager;
 
@@ -33,23 +34,13 @@ public class UIManager : MonoBehaviour
 
     private bool isInMainMenu = true;
     private bool isLoadingGame = false;
+    private bool IsInShop = false;
 
     private bool FoundObjects = false;
+    private bool FoundButtons = false;
 
     private void Update()
     {
-        if(!FoundObjects)
-        {
-            foreach (GameObject gameObject in FindAllObjectsInScene())
-            {
-                if(gameObject.name == "SelectionMenu")
-                {
-                    Debug.Log("Found: " + gameObject.name);
-                }
-            }
-            FoundObjects = true;
-        }
-
         if (isInMainMenu)
         {
             if (Input.GetKeyDown(KeyCode.Space))
@@ -59,7 +50,11 @@ public class UIManager : MonoBehaviour
             }
         }
         SelectLevel();
-        AddBuyFunctionToButton("PoxhYT");
+
+        if(IsInShop)
+        {
+            AddBuyFunctionToButton("PoxhYT");
+        }
     }
 
     public IEnumerator StartTransition(GameObject LastMenu, GameObject TargetMenu)
@@ -89,7 +84,10 @@ public class UIManager : MonoBehaviour
         {
             level.onClick.AddListener(() =>
             {
-                LoadGame(level.gameObject);
+                if(level.name.Contains("LEVEL"))
+                {
+                    LoadGame(level.gameObject);
+                }
             });
         }
     }
@@ -100,52 +98,56 @@ public class UIManager : MonoBehaviour
         BoughtSkin = false;
     }
 
+    private IEnumerator SetupBuyButtons()
+    {
+        AddBuyFunctionToButton("PoxhYT");
+        yield return new WaitForSecondsRealtime(2);
+        FoundButtons = true;
+        Debug.Log("Finished: " + FoundButtons);
+    }
 
     public async void AddBuyFunctionToButton(string username)
     {
-        if(!SetupButton)
+        var user = await firebaseManager.GetUser(username);
+        List<SkinInfo> skinInfos = user.skins;
+
+        foreach (Button button in FindObjectsOfType<Button>())
         {
-            var user = await firebaseManager.GetUser(username);
-            List<SkinInfo> skinInfos = user.skins;
-
-            foreach (Button button in FindObjectsOfType<Button>())
+            if (button.name.Contains("CUBE"))
             {
-                if (button.name.Contains("CUBE"))
+                button.onClick.AddListener(() =>
                 {
-                    button.onClick.AddListener(() =>
+                    if (!BoughtSkin)
                     {
-                        if (!BoughtSkin)
+                        for (int i = 0; i < skinInfos.Count; i++)
                         {
-                            for (int i = 0; i < skinInfos.Count; i++)
+                            SkinInfo skinInfo = skinInfos[i];
+                            if (skinInfo.skinname == CurrentSkin.text)
                             {
-                                SkinInfo skinInfo = skinInfos[i];
-                                if(skinInfo.skinname == CurrentSkin.text)
+                                Debug.Log("YEESSSSS");
+                                if (!skinInfo.bought)
                                 {
-                                    Debug.Log("YEESSSSS");
-                                    if (!skinInfo.bought)
-                                    {
-                                        skinInfo.bought = true;
+                                    skinInfo.bought = true;
 
-                                        Debug.Log("--------------------");
-                                        string json = JsonConvert.SerializeObject(skinInfos);
-                                        Debug.Log(json);
-                                        Debug.Log("--------------------");
+                                    Debug.Log("--------------------");
+                                    string json = JsonConvert.SerializeObject(skinInfos);
+                                    Debug.Log(json);
+                                    Debug.Log("--------------------");
 
-                                        firebaseManager.UpdateUser(username, "skins", json);
-                                        ChangeButtonState();
-                                        Debug.Log("Bought skin: " + CurrentSkin.text);
+                                    firebaseManager.UpdateUser(username, "skins", json);
+                                    ChangeButtonState();
+                                    Debug.Log("Bought skin: " + CurrentSkin.text);
 
-                                        BoughtSkin = true;
-                                        StartCoroutine(EndBuyPhase());
-                                    }
+                                    BoughtSkin = true;
+                                    StartCoroutine(EndBuyPhase());
                                 }
                             }
                         }
-                    });
-                }
+                    }
+                });
+
+                Debug.Log("Added listener on: " + button.name);
             }
-            Debug.Log("Finished");
-            SetupButton = true;
         }
     }
 
@@ -211,6 +213,7 @@ public class UIManager : MonoBehaviour
                 skin.transform.localScale = new Vector3(0, 0, 0);
             }
         }
+
     }
 
     public void OpenSettings()
@@ -227,6 +230,7 @@ public class UIManager : MonoBehaviour
     private User UserFromJSON()
     {
         string json = File.ReadAllText(Application.dataPath + "/user.json");
+        Debug.Log(json);
         return JsonUtility.FromJson<User>(json);
     }
 
@@ -241,10 +245,13 @@ public class UIManager : MonoBehaviour
         if(IsBasicUser())
         {
             User user = UserFromJSON();
-            user.username = Username.text;
+            user.username = "PoxhYT";
+
+            Debug.Log(user.username);
 
             string jsonUser = JsonUtility.ToJson(user);
-            Debug.Log(jsonUser);
+
+            File.Delete(Application.dataPath + "/user.json");
 
             File.WriteAllText(Application.dataPath + "/user.json", jsonUser);
             Debug.Log("Changed username to: " + Username.text);
@@ -273,14 +280,17 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public static List<GameObject> FindAllObjectsInScene()
+    public void OpenItemShop()
     {
-        UnityEngine.SceneManagement.Scene activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+        StartCoroutine(StartTransition(SelectionMenu, ItemShop));
+        IsInShop = true;
+    }
 
+    private List<GameObject> FindAllObjectsInScene()
+    {
+        Scene activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
         GameObject[] rootObjects = activeScene.GetRootGameObjects();
-
         GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
-
         List<GameObject> objectsInScene = new List<GameObject>();
 
         for (int i = 0; i < rootObjects.Length; i++)
