@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FirebaseManager : MonoBehaviour
 {
@@ -63,10 +64,9 @@ public class FirebaseManager : MonoBehaviour
         await GetUser(username.text);
     }
 
-    private async Task<User> GetUser(string username)
+    public async Task<User> GetUser(string username)
     {
         var task = await reference.Child("users").Child(username).GetValueAsync();
-
 
         DataSnapshot snapshot = task;
 
@@ -88,5 +88,11 @@ public class FirebaseManager : MonoBehaviour
         var task = await reference.Child("users").Child(username).GetValueAsync();
         DataSnapshot snapshot = task;
         return snapshot.Child("username").Value != null;
+    }
+
+    public async void UpdateUser(string username, string path, string json)
+    {
+        await reference.Child("users").Child(username).Child("skins").SetRawJsonValueAsync(json);
+        Debug.Log("Updated user!");
     }
 }
