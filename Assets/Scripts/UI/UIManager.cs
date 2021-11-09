@@ -1,6 +1,8 @@
+using Michsky.UI.ModernUIPack;
 using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -12,62 +14,63 @@ public class UIManager : MonoBehaviour
     public GameObject MainMenu;
     public GameObject SelectionMenu;
 
+    public GameObject UsernameSettings;
+    public GameObject Settings;
+
+    private GameObject CurrentGameObject;
+    public GameObject LevelSelection;
+
     public FirebaseManager firebaseManager;
 
     public TMPro.TMP_Text CurrentSkin;
+    public TMPro.TMP_Text Username;
 
     private bool SetupButton = false;
     private bool BoughtSkin = false;
 
     public List<TMPro.TMP_Text> buttonTextList = new List<TMPro.TMP_Text>();
+    public ModalWindowManager modalWindowManager;
 
     private bool isInMainMenu = true;
-    private bool isInSelectionMenu = false;
     private bool isLoadingGame = false;
+
+    private bool FoundObjects = false;
 
     private void Update()
     {
+        if(!FoundObjects)
+        {
+            foreach (GameObject gameObject in FindAllObjectsInScene())
+            {
+                if(gameObject.name == "SelectionMenu")
+                {
+                    Debug.Log("Found: " + gameObject.name);
+                }
+            }
+            FoundObjects = true;
+        }
+
         if (isInMainMenu)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                GoToSelectionMenu();
-            }
-        }
-
-        if (isInSelectionMenu)
-        {
-            if (SceneManager.GetActiveScene().name == "MainScreen")
-            {
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    StartGame();
-                }
+                StartCoroutine(StartTransition(MainMenu, SelectionMenu));
+                isInMainMenu = false;
             }
         }
         SelectLevel();
         AddBuyFunctionToButton("PoxhYT");
     }
 
-    public void StartGame()
-    {
-        SceneManager.LoadScene("LEVEL-01-FOREST");
-    }
-
-    public void GoToSelectionMenu()
-    {
-        StartCoroutine(StartTransition(SelectionMenu));
-    }
-
-    public IEnumerator StartTransition(GameObject TargetMenu)
+    public IEnumerator StartTransition(GameObject LastMenu, GameObject TargetMenu)
     {
         Transition.SetActive(true);
         yield return new WaitForSecondsRealtime(2);
-        MainMenu.SetActive(false);
+        LastMenu.SetActive(false);
         TargetMenu.SetActive(true);
-        isInSelectionMenu = true;
         yield return new WaitForSecondsRealtime(1);
         Transition.SetActive(false);
+        CurrentGameObject = TargetMenu;
     }
 
     private void LoadGame(GameObject level)
@@ -96,6 +99,7 @@ public class UIManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(1);
         BoughtSkin = false;
     }
+
 
     public async void AddBuyFunctionToButton(string username)
     {
@@ -207,5 +211,97 @@ public class UIManager : MonoBehaviour
                 skin.transform.localScale = new Vector3(0, 0, 0);
             }
         }
+    }
+
+    public void OpenSettings()
+    {
+        if(IsBasicUser())
+        {
+            StartCoroutine(StartTransition(SelectionMenu, UsernameSettings));
+        } else
+        {
+            StartCoroutine(StartTransition(SelectionMenu, Settings));
+        }
+    }
+
+    private User UserFromJSON()
+    {
+        string json = File.ReadAllText(Application.dataPath + "/user.json");
+        return JsonUtility.FromJson<User>(json);
+    }
+
+    private bool IsBasicUser()
+    {
+        User user = UserFromJSON();
+        return user.username == "Player";
+    }
+
+    public void ChangeUsername()
+    {
+        if(IsBasicUser())
+        {
+            User user = UserFromJSON();
+            user.username = Username.text;
+
+            string jsonUser = JsonUtility.ToJson(user);
+            Debug.Log(jsonUser);
+
+            File.WriteAllText(Application.dataPath + "/user.json", jsonUser);
+            Debug.Log("Changed username to: " + Username.text);
+        }
+        modalWindowManager.CloseWindow();
+        StartCoroutine(StartTransition(UsernameSettings, SelectionMenu));
+    }
+
+    public bool ChangedUsername()
+    {
+        string json = File.ReadAllText(Application.dataPath + "/user.json");
+        Debug.Log("Json: " + json);
+        User user = JsonUtility.FromJson<User>(json);
+        return user.username == "Player";
+    }
+
+    public void OpenMenu(string TargetObject)
+    {
+        foreach (GameObject gameObject in FindAllObjectsInScene())
+        {
+            if (gameObject.name == TargetObject)
+            {
+                StartCoroutine(StartTransition(CurrentGameObject, gameObject));
+                CurrentGameObject = gameObject;
+            }
+        }
+    }
+
+    public static List<GameObject> FindAllObjectsInScene()
+    {
+        UnityEngine.SceneManagement.Scene activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+
+        GameObject[] rootObjects = activeScene.GetRootGameObjects();
+
+        GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+
+        List<GameObject> objectsInScene = new List<GameObject>();
+
+        for (int i = 0; i < rootObjects.Length; i++)
+        {
+            objectsInScene.Add(rootObjects[i]);
+        }
+
+        for (int i = 0; i < allObjects.Length; i++)
+        {
+            if (allObjects[i].transform.root)
+            {
+                for (int i2 = 0; i2 < rootObjects.Length; i2++)
+                {
+                    if (allObjects[i].transform.root == rootObjects[i2].transform && allObjects[i] != rootObjects[i2])
+                    {
+                        objectsInScene.Add(allObjects[i]);
+                        break;
+                    }
+                }
+            }
+        }
+        return objectsInScene;
     }
 }
