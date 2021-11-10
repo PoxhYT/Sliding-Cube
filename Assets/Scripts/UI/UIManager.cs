@@ -13,10 +13,8 @@ public class UIManager : MonoBehaviour
     public GameObject Transition;
     public GameObject MainMenu;
     public GameObject SelectionMenu;
-
     public GameObject UsernameSettings;
     public GameObject Settings;
-
     private GameObject CurrentGameObject;
     public GameObject LevelSelection;
     public GameObject ItemShop;
@@ -26,18 +24,13 @@ public class UIManager : MonoBehaviour
     public TMPro.TMP_Text CurrentSkin;
     public TMPro.TMP_Text Username;
 
-    private bool SetupButton = false;
     private bool BoughtSkin = false;
-
-    public List<TMPro.TMP_Text> buttonTextList = new List<TMPro.TMP_Text>();
-    public ModalWindowManager modalWindowManager;
-
     private bool isInMainMenu = true;
     private bool isLoadingGame = false;
     private bool IsInShop = false;
-
-    private bool FoundObjects = false;
     private bool FoundButtons = false;
+
+    public ModalWindowManager modalWindowManager;
 
     private void Update()
     {
@@ -218,18 +211,24 @@ public class UIManager : MonoBehaviour
 
     public void OpenSettings()
     {
-        if(IsBasicUser())
+        if (IsBasicUser())
         {
             StartCoroutine(StartTransition(SelectionMenu, UsernameSettings));
-        } else
+        }
+        else
         {
             StartCoroutine(StartTransition(SelectionMenu, Settings));
         }
     }
 
+    private string GetPath()
+    {
+        return Application.dataPath + "/StreamingAssets/user.json";
+    }
+
     private User UserFromJSON()
     {
-        string json = File.ReadAllText(Application.dataPath + "/user.json");
+        string json = File.ReadAllText(GetPath());
         Debug.Log(json);
         return JsonUtility.FromJson<User>(json);
     }
@@ -237,7 +236,7 @@ public class UIManager : MonoBehaviour
     private bool IsBasicUser()
     {
         User user = UserFromJSON();
-        return user.username == "Player";
+        return user.username.Contains("Player");
     }
 
     public void ChangeUsername()
@@ -245,15 +244,15 @@ public class UIManager : MonoBehaviour
         if(IsBasicUser())
         {
             User user = UserFromJSON();
-            user.username = "PoxhYT";
+            user.username = Username.text;
 
             Debug.Log(user.username);
 
             string jsonUser = JsonUtility.ToJson(user);
 
-            File.Delete(Application.dataPath + "/user.json");
+            File.Delete(GetPath());
 
-            File.WriteAllText(Application.dataPath + "/user.json", jsonUser);
+            File.WriteAllText(GetPath(), jsonUser);
             Debug.Log("Changed username to: " + Username.text);
         }
         modalWindowManager.CloseWindow();
@@ -262,7 +261,7 @@ public class UIManager : MonoBehaviour
 
     public bool ChangedUsername()
     {
-        string json = File.ReadAllText(Application.dataPath + "/user.json");
+        string json = File.ReadAllText(GetPath());
         Debug.Log("Json: " + json);
         User user = JsonUtility.FromJson<User>(json);
         return user.username == "Player";
