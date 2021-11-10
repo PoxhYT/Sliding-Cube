@@ -42,8 +42,8 @@ public class FirebaseManager : MonoBehaviour
 
         if (!UserInDatabase)
         {
-            User user = new User(username.text, new List<string>(), new List<SkinInfo>());
-            user.finishedLevel.Add("LEVEL-01-FOREST");
+            User user = new User(username.text, 1000, new List<SkinInfo>(), new List<Level>());
+            user.levels.Add(new Level("LEVEL-01-FOREST", true, 0));
             user.skins.Add(new SkinInfo("RED-CUBE", 0, true));
             string json = JsonUtility.ToJson(user);
 
@@ -57,11 +57,6 @@ public class FirebaseManager : MonoBehaviour
                 Debug.Log("Error: " + e);
             }
         }
-    }
-
-    public async void test()
-    {
-        await GetUser(username.text);
     }
 
     public async Task<User> GetUser(string username)
