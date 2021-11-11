@@ -11,7 +11,8 @@ public class FirebaseManager : MonoBehaviour
 
 
     [SerializeField] TMPro.TMP_InputField username;
-    DatabaseReference reference;
+    [HideInInspector]
+    public DatabaseReference reference;
 
     private void Start()
     {
@@ -36,13 +37,13 @@ public class FirebaseManager : MonoBehaviour
         });
     }
 
-    public async void AddUserToDatabase()
+    public async void AddUserToDatabase(string username)
     {
-        var UserInDatabase = await IsUserInDatabase(username.text);
+        var UserInDatabase = await IsUserInDatabase(username);
 
         if (!UserInDatabase)
         {
-            User user = new User(username.text, 1000, new List<SkinInfo>(), new List<Level>());
+            User user = new User(username, 1000, new List<SkinInfo>(), new List<Level>());
             user.levels.Add(new Level("LEVEL-01-FOREST", true, 0));
             user.skins.Add(new SkinInfo("RED-CUBE", 0, true));
             string json = JsonUtility.ToJson(user);
@@ -50,7 +51,7 @@ public class FirebaseManager : MonoBehaviour
             try
             {
                 await reference.Child("users").Child(user.username).SetRawJsonValueAsync(json);
-                Debug.Log("Added " + username.text + " to the database");
+                Debug.Log("Added " + username + " to the database");
             }
             catch (Exception e)
             {
