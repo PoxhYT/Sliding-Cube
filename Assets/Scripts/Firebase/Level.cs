@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-
-public class Level : MonoBehaviour
+public class Level
 {
     public string levelname;
     public bool finished;

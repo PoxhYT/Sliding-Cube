@@ -7,7 +7,7 @@ public class ScoreboardManager : MonoBehaviour
 {
     public Transform ScoreboardContainer;
     public Transform ScoreboardElement;
-    private List<ScoreboardEntry> scoreboardEntries;
+    private List<User> UserList = new List<User>();
     private List<Transform> scoreboardEntryTransfomList;
 
     public FirebaseManager firebaseManager;
@@ -15,73 +15,65 @@ public class ScoreboardManager : MonoBehaviour
     private void Awake()
     {
         ScoreboardElement.gameObject.SetActive(false);
+    }
 
-        scoreboardEntries = new List<ScoreboardEntry>()
-        {
-            new ScoreboardEntry{ atempts = 12, name = "AAA" },
-            new ScoreboardEntry{ atempts = 24, name = "BBB" },
-            new ScoreboardEntry{ atempts = 8, name = "CCC" },
-            new ScoreboardEntry{ atempts = 21, name = "DDD" },
-            new ScoreboardEntry{ atempts = 2, name = "EEE" },
-            new ScoreboardEntry{ atempts = 5, name = "FFF" },
-            new ScoreboardEntry{ atempts = 30, name = "GGG" },
-            new ScoreboardEntry{ atempts = 9, name = "HHH" },
-            new ScoreboardEntry{ atempts = 1, name = "III" },
-            new ScoreboardEntry{ atempts = 3, name = "JJJ" },
-        };
+    private void Start()
+    {
+        AddUserDataToScoreboard();
+    }
 
-        firebaseManager.reference = FirebaseDatabase.DefaultInstance.RootReference;
+    private async void AddUserDataToScoreboard()
+    {
+        DataSnapshot snapshot = await firebaseManager.GetUsers();
 
-        firebaseManager.AddUserToDatabase("PoxhYT");
-        firebaseManager.AddUserToDatabase("PoxhYT2");
-        firebaseManager.AddUserToDatabase("PoxhYT3");
-        firebaseManager.AddUserToDatabase("PoxhYT4");
-        firebaseManager.AddUserToDatabase("PoxhYT5");
-        firebaseManager.AddUserToDatabase("PoxhYT6");
-        firebaseManager.AddUserToDatabase("PoxhYT7");
-        firebaseManager.AddUserToDatabase("PoxhYT8");
-        firebaseManager.AddUserToDatabase("PoxhYT9");
-        firebaseManager.AddUserToDatabase("PoxhYT10");
-        firebaseManager.AddUserToDatabase("PoxhYT11");
-        firebaseManager.AddUserToDatabase("PoxhYT12");
-
-        var task = firebaseManager.reference.Child("users").GetValueAsync();
-        DataSnapshot snapshot = task.Result;
-
-        //Loop through every users UID
         foreach (DataSnapshot childSnapshot in snapshot.Children)
         {
-            Debug.Log(childSnapshot);
-
-            //Instantiate new scoreboard elements
+            var user = JsonUtility.FromJson<User>(childSnapshot.GetRawJsonValue());
+            if (!UserList.Contains(user))
+            {
+                UserList.Add(user);
+            }
         }
 
         SortScoreboardEntryList();
 
         scoreboardEntryTransfomList = new List<Transform>();
-        foreach (ScoreboardEntry scoreboardEntry in scoreboardEntries)
+        int AllUsers = 0;
+
+        Debug.Log(UserList.Count);
+
+        for (int i = 0; i < UserList.Count; i++)
         {
-            CreateHighscoreEntryTransform(scoreboardEntry, ScoreboardContainer, scoreboardEntryTransfomList);
+            User user = UserList[i];
+
+            CreateHighscoreEntryTransform(user.levels[0].attempts, user.username, ScoreboardContainer, scoreboardEntryTransfomList, false);
+            AllUsers++;
+        }
+
+        for (int i = 0; i < 12 - AllUsers; i++)
+        {
+            CreateHighscoreEntryTransform(0, "NO DATA", ScoreboardContainer, scoreboardEntryTransfomList, true);
         }
     }
 
     private void SortScoreboardEntryList()
     {
-        for (int i = 0; i < scoreboardEntries.Count; i++)
+
+        for (int i = 0; i < UserList.Count; i++)
         {
-            for (int k = 0; k < scoreboardEntries.Count; k++)
+            for (int k = 0; k < UserList.Count; k++)
             {
-                if(scoreboardEntries[k].atempts > scoreboardEntries[i].atempts)
+                if(UserList[k].levels[0].attempts > UserList[i].levels[0].attempts)
                 {
-                    ScoreboardEntry scoreboardEntry = scoreboardEntries[i];
-                    scoreboardEntries[i] = scoreboardEntries[k];
-                    scoreboardEntries[k] = scoreboardEntry;
+                    User user = UserList[i];
+                    UserList[i] = UserList[k];
+                    UserList[k] = user;
                 }
             }
         }
     }
 
-    private void CreateHighscoreEntryTransform(ScoreboardEntry scoreboardEntry, Transform container, List<Transform> transforms)
+    private void CreateHighscoreEntryTransform(int attempts, string usernameFinal, Transform container, List<Transform> transforms, bool NoData)
     {
 
         Transform EntryTransform = Instantiate(ScoreboardElement, ScoreboardContainer);
@@ -102,9 +94,20 @@ public class ScoreboardManager : MonoBehaviour
 
         EntryTransform.Find("placement").GetComponent<TMPro.TMP_Text>().text = RankString;
 
-        int atempts = scoreboardEntry.atempts;
-        EntryTransform.Find("atempts").GetComponent<TMPro.TMP_Text>().text = atempts.ToString();
-        EntryTransform.Find("username").GetComponent<TMPro.TMP_Text>().text = scoreboardEntry.name;
+        int atempts = attempts;
+
+        TMPro.TMP_Text atemptsText = EntryTransform.Find("atempts").GetComponent<TMPro.TMP_Text>();
+        TMPro.TMP_Text username = EntryTransform.Find("username").GetComponent<TMPro.TMP_Text>();
+
+        if (NoData)
+        {
+            atemptsText.text = "NO DATA";
+            username.text = "NO DATA";
+        } else
+        {
+            atemptsText.text = atempts.ToString();
+            username.text = usernameFinal;
+        }
 
         transforms.Add(EntryTransform);
     }
