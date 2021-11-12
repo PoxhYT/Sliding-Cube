@@ -1,6 +1,7 @@
 using Firebase.Database;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class ScoreboardManager : MonoBehaviour
@@ -31,6 +32,8 @@ public class ScoreboardManager : MonoBehaviour
             var user = JsonUtility.FromJson<User>(childSnapshot.GetRawJsonValue());
             if (!UserList.Contains(user))
             {
+                string json = JsonUtility.ToJson(user);
+                Debug.Log(json);
                 UserList.Add(user);
             }
         }

@@ -19,6 +19,29 @@ public class FirebaseManager : MonoBehaviour
         Debug.Log("HELLO!");
 
         reference = FirebaseDatabase.DefaultInstance.RootReference;
+
+        FirebaseDatabase.DefaultInstance.GetReference("users").ValueChanged += HandleValueChanged;
+    }
+
+    void HandleValueChanged(object sender, ValueChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+        Debug.Log(args.Snapshot);
+    }
+
+    private async void test(string username, int atempts, int price)
+    {
+        User user = new User(username, 1000, new List<SkinInfo>(), new List<Level>());
+        user.levels.Add(new Level("LEVEL-01-FOREST", true, atempts));
+        user.skins.Add(new SkinInfo("RED-CUBE", price, true));
+        string json = JsonUtility.ToJson(user);
+
+        await reference.Child("users").Child(user.username).SetRawJsonValueAsync(json);
+        Debug.Log("Added " + username + " to the database");
     }
 
     public async void AddUserToDatabase(string username)
