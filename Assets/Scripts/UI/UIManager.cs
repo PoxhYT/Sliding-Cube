@@ -320,13 +320,14 @@ public class UIManager : MonoBehaviour
         return objectsInScene;
     }
 
-    private void ChnageCurrentScoreboardContainer(string TargetScoreboard)
+    private void ChangeCurrentScoreboardContainer(string TargetScoreboard)
     {
         for (int i = 0; i < scoreboardManager.ScoreboardContainers.Count; i++)
         {
             if (scoreboardManager.ScoreboardContainers[i].name.Contains(TargetScoreboard))
             {
                 scoreboardManager.CurrentContainer = scoreboardManager.ScoreboardContainers[i];
+                Debug.Log("Container: " + scoreboardManager.ScoreboardContainers[i].name);
             }
         }
     }
@@ -362,12 +363,13 @@ public class UIManager : MonoBehaviour
             Debug.Log("ALREADY IN WINDOW!");
         } else
         {
-            ChnageCurrentScoreboardContainer(TargetScoreboard);
+            ChangeCurrentScoreboardContainer(TargetScoreboard);
 
             foreach (GameObject gameObject in FindAllObjectsInScene())
             {
                 if (gameObject.name == TargetScoreboard)
                 {
+                    Debug.Log(gameObject.name);
                     StartCoroutine(StartScoreboardTransition(scoreboardManager.CurrentContainer.gameObject, gameObject));
                 }
             }

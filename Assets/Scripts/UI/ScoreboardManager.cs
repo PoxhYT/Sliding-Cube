@@ -1,4 +1,5 @@
 using Firebase.Database;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -30,56 +31,51 @@ public class ScoreboardManager : MonoBehaviour
         /*StartCoroutine(WaitForScoreboardUpdate());*/
         CurrentContainer = ScoreboardContainers[0];
         Debug.Log("FinalContainer: " + CurrentContainer);
-        InvokeRepeating("UpdateScoreboard", 2.0f, 3.0f);
+        InvokeRepeating("ListenForValueChanges", 2.0f, 3.0f);
     }
 
-    public void UpdateScoreboard()
+    private IEnumerator ChangeValueChangedState()
     {
-        FirebaseDatabase.DefaultInstance.GetReference("users").ChildChanged += HandleValueChanged;
-    }
-
-    private IEnumerator SetValueChangedState()
-    {
-        yield return new WaitForSecondsRealtime(3);
+        yield return new WaitForSecondsRealtime(1);
         ValueChanged = false;
     }
 
-    void HandleValueChanged(object sender, ChildChangedEventArgs args)
+    private void ValueChangedListener(object sender, ChildChangedEventArgs args)
     {
-        if (!ValueChanged)
+        if(!ValueChanged)
         {
             ValueChanged = true;
 
             if (args.DatabaseError != null)
             {
                 Debug.LogError(args.DatabaseError.Message);
-                return;
             }
+
             Debug.Log(args.Snapshot);
 
-            StartCoroutine(WaitForScoreboardUpdate());
-            StartCoroutine(SetValueChangedState());
+            string[] lines = args.Snapshot.GetRawJsonValue().Split(new[] { "\"", "\"" }, StringSplitOptions.None);
+
+            foreach (string line in lines)
+            {
+                if(line.Contains("LEVEL"))
+                {
+                    Debug.Log(line);
+                }
+            }
+
+            Debug.Log(args.Snapshot.GetRawJsonValue());
+            StartCoroutine(ChangeValueChangedState());
+        } else
+        {
+            Debug.Log("Please wait a second before you try to get new data!");
         }
     }
 
-    public IEnumerator WaitForScoreboardUpdate()
+    public void ListenForValueChanges()
     {
-        ProgressBar.SetActive(true);
-        yield return new WaitForSecondsRealtime(2);
-        ProgressBar.SetActive(false);
-        for (int i = 0; i < ScoreboardContainers.Count; i++)
-        {
-            if (ScoreboardContainers[i].name.Contains(CurrentContainer.name))
-            {
-                Transform Container = ScoreboardContainers[i];
-                if(!AddedDataToScoreboard)
-                {
-                    AddUserDataToScoreboard(Container, CurrentContainer.name);
-                    AddedDataToScoreboard = true;
-                }
-            }
-        }
+        FirebaseDatabase.DefaultInstance.GetReference("users").Child("PoxhYT").Child("levels").ChildChanged += ValueChangedListener;
     }
+
 
     private void ClearScoreboardData(Transform Scoreboard)
     {
@@ -90,12 +86,48 @@ public class ScoreboardManager : MonoBehaviour
         }
 
         UserList.Clear();
-        ClearScoreboardData(Scoreboard);
+    }
+
+    private IEnumerator ChangeReceivedDataState()
+    {
+        yield return new WaitForSecondsRealtime(1);
+        ValueChanged = false;
+    }
+
+    private int index(string TargetLevel)
+    {
+        if(TargetLevel.Contains("01"))
+        {
+            return 0;
+        } else
+        {
+            return 1;
+        }
+    }
+
+    private void SortScoreboardEntryList(int index)
+    {
+        Debug.Log("Index: " + index);
+        for (int i = 0; i < UserList.Count; i++)
+        {
+            for (int k = 0; k < UserList.Count; k++)
+            {
+                if (UserList[k].levels[index].attempts > UserList[i].levels[index].attempts)
+                {
+                    User user = UserList[i];
+                    UserList[i] = UserList[k];
+                    UserList[k] = user;
+                }
+            }
+        }
+        Debug.Log("Finished: SortScoreboardEntryList");
     }
 
     private async void AddUserDataToScoreboard(Transform Scoreboard, string TargetLevel)
     {
-        if(!ReceivedData)
+        ClearScoreboardData(Scoreboard);
+
+        if (!ReceivedData)
         {
             DataSnapshot snapshot = await firebaseManager.GetUsers();
 
@@ -111,13 +143,7 @@ public class ScoreboardManager : MonoBehaviour
             ReceivedData = true;
         }
 
-        for (int i = 0; i < ScoreboardContainers.Count; i++)
-        {
-            if(ScoreboardContainers[i].name.Contains(TargetLevel))
-            {
-                SortScoreboardEntryList(i);
-            }
-        }
+        SortScoreboardEntryList(index(TargetLevel));
 
         scoreboardEntryTransfomList = new List<Transform>();
         int AllUsers = 0;
@@ -130,11 +156,11 @@ public class ScoreboardManager : MonoBehaviour
 
             for (int k = 0; k < user.levels.Count; k++)
             {
-                if(user.levels[k].levelname.Contains(TargetLevel) && user.levels[k].finished && user.levels[k].attempts > 0)
+                if (user.levels[k].levelname.Contains(TargetLevel) && user.levels[k].finished && user.levels[k].attempts > 0)
                 {
                     AllUsers++;
 
-                    if(AllUsers < 13)
+                    if (AllUsers < 13)
                     {
                         Level level = user.levels[k];
                         CreateHighscoreEntryTransform(level.attempts, user.username, scoreboardEntryTransfomList, false, Scoreboard);
@@ -147,24 +173,32 @@ public class ScoreboardManager : MonoBehaviour
         {
             CreateHighscoreEntryTransform(0, "NO DATA", scoreboardEntryTransfomList, true, Scoreboard);
         }
+
+        ReceivedData = false;
     }
 
-    private void SortScoreboardEntryList(int index)
-    {
 
-        for (int i = 0; i < UserList.Count; i++)
+    public IEnumerator WaitForScoreboardUpdate()
+    {
+        ProgressBar.SetActive(true);
+        yield return new WaitForSecondsRealtime(2);
+        ProgressBar.SetActive(false);
+        for (int i = 0; i < ScoreboardContainers.Count; i++)
         {
-            for (int k = 0; k < UserList.Count; k++)
+            if (ScoreboardContainers[i].name.Contains(CurrentContainer.name))
             {
-                if(UserList[k].levels[index].attempts > UserList[i].levels[index].attempts)
+                Transform Container = ScoreboardContainers[i];
+                if (!AddedDataToScoreboard)
                 {
-                    User user = UserList[i];
-                    UserList[i] = UserList[k];
-                    UserList[k] = user;
+                    AddUserDataToScoreboard(Container, CurrentContainer.name);
+                    AddedDataToScoreboard = true;
                 }
             }
         }
+        yield return new WaitForSecondsRealtime(1);
+        AddedDataToScoreboard = false;
     }
+
 
     private void CreateHighscoreEntryTransform(int attempts, string usernameFinal, List<Transform> transforms, bool NoData, Transform Scoreboard)
     {
