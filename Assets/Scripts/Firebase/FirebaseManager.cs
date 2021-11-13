@@ -16,21 +16,7 @@ public class FirebaseManager : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("HELLO!");
-
         reference = FirebaseDatabase.DefaultInstance.RootReference;
-
-        FirebaseDatabase.DefaultInstance.GetReference("users").ValueChanged += HandleValueChanged;
-    }
-
-    void HandleValueChanged(object sender, ValueChangedEventArgs args)
-    {
-        if (args.DatabaseError != null)
-        {
-            Debug.LogError(args.DatabaseError.Message);
-            return;
-        }
-        Debug.Log(args.Snapshot);
     }
 
     private async void test(string username, int atempts, int price)

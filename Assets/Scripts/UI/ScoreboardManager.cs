@@ -11,7 +11,10 @@ public class ScoreboardManager : MonoBehaviour
     private List<User> UserList = new List<User>();
     private List<Transform> scoreboardEntryTransfomList;
 
+    public GameObject ProgressBar;
     public FirebaseManager firebaseManager;
+
+    private bool ValueChanged = false;
 
     private void Awake()
     {
@@ -20,22 +23,72 @@ public class ScoreboardManager : MonoBehaviour
 
     private void Start()
     {
+        /*StartCoroutine(WaitForScoreboardUpdate());*/
+        InvokeRepeating("UpdateScoreboard", 2.0f, 3.0f);
+    }
+
+    public void UpdateScoreboard()
+    {
+        /*UserList.Clear();
+        ClearScoreboardData();*/
+        FirebaseDatabase.DefaultInstance.GetReference("users").ChildChanged += HandleValueChanged;
+    }
+
+    private IEnumerator SetValueChangedState()
+    {
+        yield return new WaitForSecondsRealtime(3);
+        ValueChanged = false;
+    }
+
+    void HandleValueChanged(object sender, ChildChangedEventArgs args)
+    {
+        if (!ValueChanged)
+        {
+            ValueChanged = true;
+
+            if (args.DatabaseError != null)
+            {
+                Debug.LogError(args.DatabaseError.Message);
+                return;
+            }
+            Debug.Log(args.Snapshot);
+
+            StartCoroutine(WaitForScoreboardUpdate());
+            StartCoroutine(SetValueChangedState());
+        }
+    }
+
+    private IEnumerator WaitForScoreboardUpdate()
+    {
+        Debug.Log("UPDATE");
+        ProgressBar.SetActive(true);
+        yield return new WaitForSecondsRealtime(2);
+        ProgressBar.SetActive(false);
         AddUserDataToScoreboard();
+    }
+
+    private void ClearScoreboardData()
+    {
+        foreach (Transform ScoreboardItem in ScoreboardContainer)
+        {
+            Debug.Log("Removed: " + ScoreboardItem.name);
+            Destroy(ScoreboardItem.gameObject);
+        }
     }
 
     private async void AddUserDataToScoreboard()
     {
+        UserList.Clear();
+        ClearScoreboardData();
+
         DataSnapshot snapshot = await firebaseManager.GetUsers();
 
         foreach (DataSnapshot childSnapshot in snapshot.Children)
         {
             var user = JsonUtility.FromJson<User>(childSnapshot.GetRawJsonValue());
-            if (!UserList.Contains(user))
-            {
-                string json = JsonUtility.ToJson(user);
-                Debug.Log(json);
-                UserList.Add(user);
-            }
+            string json = JsonUtility.ToJson(user);
+            Debug.Log(json);
+            UserList.Add(user);
         }
 
         SortScoreboardEntryList();
