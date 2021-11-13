@@ -23,6 +23,7 @@ public class FirebaseManager : MonoBehaviour
     {
         User user = new User(username, 1000, new List<SkinInfo>(), new List<Level>());
         user.levels.Add(new Level("LEVEL-01-FOREST", true, atempts));
+        user.levels.Add(new Level("LEVEL-01-HIGHWAY", true, atempts));
         user.skins.Add(new SkinInfo("RED-CUBE", price, true));
         string json = JsonUtility.ToJson(user);
 
@@ -87,7 +88,6 @@ public class FirebaseManager : MonoBehaviour
 
     public async Task<DataSnapshot> GetUsers()
     {
-        Debug.Log(reference);
         var task = await reference.Child("users").GetValueAsync();
         return task;
     }

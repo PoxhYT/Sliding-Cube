@@ -1,5 +1,4 @@
 using Michsky.UI.ModernUIPack;
-using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -19,6 +18,7 @@ public class UIManager : MonoBehaviour
     public GameObject LevelSelection;
     public GameObject ItemShop;
 
+    public ScoreboardManager scoreboardManager;
     public FirebaseManager firebaseManager;
 
     public TMPro.TMP_Text CurrentSkin;
@@ -31,6 +31,10 @@ public class UIManager : MonoBehaviour
     private bool FoundButtons = false;
 
     public ModalWindowManager modalWindowManager;
+
+    private void Start()
+    {
+    }
 
     private void Update()
     {
@@ -59,6 +63,8 @@ public class UIManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(1);
         Transition.SetActive(false);
         CurrentGameObject = TargetMenu;
+
+        Debug.Log("LastMenu: " + LastMenu);
     }
 
     private void LoadGame(GameObject level)
@@ -123,7 +129,7 @@ public class UIManager : MonoBehaviour
                                     skinInfo.bought = true;
 
                                     Debug.Log("--------------------");
-                                    string json = JsonConvert.SerializeObject(skinInfos);
+                                    string json = JsonUtility.ToJson(skinInfos);
                                     Debug.Log(json);
                                     Debug.Log("--------------------");
 
@@ -312,5 +318,59 @@ public class UIManager : MonoBehaviour
             }
         }
         return objectsInScene;
+    }
+
+    private void ChnageCurrentScoreboardContainer(string TargetScoreboard)
+    {
+        for (int i = 0; i < scoreboardManager.ScoreboardContainers.Count; i++)
+        {
+            if (scoreboardManager.ScoreboardContainers[i].name.Contains(TargetScoreboard))
+            {
+                scoreboardManager.CurrentContainer = scoreboardManager.ScoreboardContainers[i];
+            }
+        }
+    }
+
+    private IEnumerator DisableScoreboards()
+    {
+        yield return new WaitForSecondsRealtime(1);
+        foreach (GameObject gameObject in FindAllObjectsInScene())
+        {
+            if (gameObject.name.Contains("LEVEL") && !gameObject.name.Contains(scoreboardManager.CurrentContainer.name))
+            {
+                gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private IEnumerator StartScoreboardTransition(GameObject LastMenu, GameObject TargetMenu)
+    {
+        Transition.SetActive(true);
+        yield return new WaitForSecondsRealtime(2);
+        StartCoroutine(DisableScoreboards());
+        TargetMenu.SetActive(true);
+        StartCoroutine(scoreboardManager.WaitForScoreboardUpdate());
+        yield return new WaitForSecondsRealtime(1);
+        Transition.SetActive(false);
+        CurrentGameObject = TargetMenu;
+    }
+
+    public void OpenScoreboard(string TargetScoreboard)
+    {
+        if(scoreboardManager.CurrentContainer.name.Contains(TargetScoreboard))
+        {
+            Debug.Log("ALREADY IN WINDOW!");
+        } else
+        {
+            ChnageCurrentScoreboardContainer(TargetScoreboard);
+
+            foreach (GameObject gameObject in FindAllObjectsInScene())
+            {
+                if (gameObject.name == TargetScoreboard)
+                {
+                    StartCoroutine(StartScoreboardTransition(scoreboardManager.CurrentContainer.gameObject, gameObject));
+                }
+            }
+        }
     }
 }

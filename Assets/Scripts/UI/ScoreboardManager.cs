@@ -6,7 +6,9 @@ using UnityEngine;
 
 public class ScoreboardManager : MonoBehaviour
 {
-    public Transform ScoreboardContainer;
+    public List<Transform> ScoreboardContainers;
+    [HideInInspector]
+    public Transform CurrentContainer;
     public Transform ScoreboardElement;
     private List<User> UserList = new List<User>();
     private List<Transform> scoreboardEntryTransfomList;
@@ -14,7 +16,9 @@ public class ScoreboardManager : MonoBehaviour
     public GameObject ProgressBar;
     public FirebaseManager firebaseManager;
 
+    private bool ReceivedData = false;
     private bool ValueChanged = false;
+    private bool AddedDataToScoreboard = false;
 
     private void Awake()
     {
@@ -24,13 +28,13 @@ public class ScoreboardManager : MonoBehaviour
     private void Start()
     {
         /*StartCoroutine(WaitForScoreboardUpdate());*/
+        CurrentContainer = ScoreboardContainers[0];
+        Debug.Log("FinalContainer: " + CurrentContainer);
         InvokeRepeating("UpdateScoreboard", 2.0f, 3.0f);
     }
 
     public void UpdateScoreboard()
     {
-        /*UserList.Clear();
-        ClearScoreboardData();*/
         FirebaseDatabase.DefaultInstance.GetReference("users").ChildChanged += HandleValueChanged;
     }
 
@@ -58,40 +62,62 @@ public class ScoreboardManager : MonoBehaviour
         }
     }
 
-    private IEnumerator WaitForScoreboardUpdate()
+    public IEnumerator WaitForScoreboardUpdate()
     {
-        Debug.Log("UPDATE");
         ProgressBar.SetActive(true);
         yield return new WaitForSecondsRealtime(2);
         ProgressBar.SetActive(false);
-        AddUserDataToScoreboard();
+        for (int i = 0; i < ScoreboardContainers.Count; i++)
+        {
+            if (ScoreboardContainers[i].name.Contains(CurrentContainer.name))
+            {
+                Transform Container = ScoreboardContainers[i];
+                if(!AddedDataToScoreboard)
+                {
+                    AddUserDataToScoreboard(Container, CurrentContainer.name);
+                    AddedDataToScoreboard = true;
+                }
+            }
+        }
     }
 
-    private void ClearScoreboardData()
+    private void ClearScoreboardData(Transform Scoreboard)
     {
-        foreach (Transform ScoreboardItem in ScoreboardContainer)
+        foreach (Transform ScoreboardItem in Scoreboard)
         {
             Debug.Log("Removed: " + ScoreboardItem.name);
             Destroy(ScoreboardItem.gameObject);
         }
+
+        UserList.Clear();
+        ClearScoreboardData(Scoreboard);
     }
 
-    private async void AddUserDataToScoreboard()
+    private async void AddUserDataToScoreboard(Transform Scoreboard, string TargetLevel)
     {
-        UserList.Clear();
-        ClearScoreboardData();
-
-        DataSnapshot snapshot = await firebaseManager.GetUsers();
-
-        foreach (DataSnapshot childSnapshot in snapshot.Children)
+        if(!ReceivedData)
         {
-            var user = JsonUtility.FromJson<User>(childSnapshot.GetRawJsonValue());
-            string json = JsonUtility.ToJson(user);
-            Debug.Log(json);
-            UserList.Add(user);
+            DataSnapshot snapshot = await firebaseManager.GetUsers();
+
+            foreach (DataSnapshot childSnapshot in snapshot.Children)
+            {
+                var user = JsonUtility.FromJson<User>(childSnapshot.GetRawJsonValue());
+                string json = JsonUtility.ToJson(user);
+
+                UserList.Add(user);
+                Debug.Log(json);
+            }
+
+            ReceivedData = true;
         }
 
-        SortScoreboardEntryList();
+        for (int i = 0; i < ScoreboardContainers.Count; i++)
+        {
+            if(ScoreboardContainers[i].name.Contains(TargetLevel))
+            {
+                SortScoreboardEntryList(i);
+            }
+        }
 
         scoreboardEntryTransfomList = new List<Transform>();
         int AllUsers = 0;
@@ -102,24 +128,35 @@ public class ScoreboardManager : MonoBehaviour
         {
             User user = UserList[i];
 
-            CreateHighscoreEntryTransform(user.levels[0].attempts, user.username, ScoreboardContainer, scoreboardEntryTransfomList, false);
-            AllUsers++;
+            for (int k = 0; k < user.levels.Count; k++)
+            {
+                if(user.levels[k].levelname.Contains(TargetLevel) && user.levels[k].finished && user.levels[k].attempts > 0)
+                {
+                    AllUsers++;
+
+                    if(AllUsers < 13)
+                    {
+                        Level level = user.levels[k];
+                        CreateHighscoreEntryTransform(level.attempts, user.username, scoreboardEntryTransfomList, false, Scoreboard);
+                    }
+                }
+            }
         }
 
         for (int i = 0; i < 12 - AllUsers; i++)
         {
-            CreateHighscoreEntryTransform(0, "NO DATA", ScoreboardContainer, scoreboardEntryTransfomList, true);
+            CreateHighscoreEntryTransform(0, "NO DATA", scoreboardEntryTransfomList, true, Scoreboard);
         }
     }
 
-    private void SortScoreboardEntryList()
+    private void SortScoreboardEntryList(int index)
     {
 
         for (int i = 0; i < UserList.Count; i++)
         {
             for (int k = 0; k < UserList.Count; k++)
             {
-                if(UserList[k].levels[0].attempts > UserList[i].levels[0].attempts)
+                if(UserList[k].levels[index].attempts > UserList[i].levels[index].attempts)
                 {
                     User user = UserList[i];
                     UserList[i] = UserList[k];
@@ -129,10 +166,10 @@ public class ScoreboardManager : MonoBehaviour
         }
     }
 
-    private void CreateHighscoreEntryTransform(int attempts, string usernameFinal, Transform container, List<Transform> transforms, bool NoData)
+    private void CreateHighscoreEntryTransform(int attempts, string usernameFinal, List<Transform> transforms, bool NoData, Transform Scoreboard)
     {
 
-        Transform EntryTransform = Instantiate(ScoreboardElement, ScoreboardContainer);
+        Transform EntryTransform = Instantiate(ScoreboardElement, Scoreboard);
         RectTransform EntryRectTransform = EntryTransform.GetComponent<RectTransform>();
         EntryRectTransform.anchoredPosition = new Vector2(0, -70 * transforms.Count);
         EntryRectTransform.gameObject.SetActive(true);
