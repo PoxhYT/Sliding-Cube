@@ -51,29 +51,14 @@ public class ScoreboardManager : MonoBehaviour
                 Debug.LogError(args.DatabaseError.Message);
             }
 
-            Debug.Log(args.Snapshot);
-
-            string[] lines = args.Snapshot.GetRawJsonValue().Split(new[] { "\"", "\"" }, StringSplitOptions.None);
-
-            foreach (string line in lines)
-            {
-                if(line.Contains("LEVEL"))
-                {
-                    Debug.Log(line);
-                }
-            }
-
-            Debug.Log(args.Snapshot.GetRawJsonValue());
+            StartCoroutine(WaitForScoreboardUpdate());
             StartCoroutine(ChangeValueChangedState());
-        } else
-        {
-            Debug.Log("Please wait a second before you try to get new data!");
         }
     }
 
     public void ListenForValueChanges()
     {
-        FirebaseDatabase.DefaultInstance.GetReference("users").Child("PoxhYT").Child("levels").ChildChanged += ValueChangedListener;
+        FirebaseDatabase.DefaultInstance.GetReference("users").ChildChanged += ValueChangedListener;
     }
 
 
@@ -86,12 +71,6 @@ public class ScoreboardManager : MonoBehaviour
         }
 
         UserList.Clear();
-    }
-
-    private IEnumerator ChangeReceivedDataState()
-    {
-        yield return new WaitForSecondsRealtime(1);
-        ValueChanged = false;
     }
 
     private int index(string TargetLevel)
@@ -107,7 +86,6 @@ public class ScoreboardManager : MonoBehaviour
 
     private void SortScoreboardEntryList(int index)
     {
-        Debug.Log("Index: " + index);
         for (int i = 0; i < UserList.Count; i++)
         {
             for (int k = 0; k < UserList.Count; k++)
@@ -120,7 +98,46 @@ public class ScoreboardManager : MonoBehaviour
                 }
             }
         }
-        Debug.Log("Finished: SortScoreboardEntryList");
+    }
+
+    private void CreateHighscoreEntryTransform(int attempts, string usernameFinal, List<Transform> transforms, bool NoData, Transform Scoreboard)
+    {
+
+        Transform EntryTransform = Instantiate(ScoreboardElement, Scoreboard);
+        RectTransform EntryRectTransform = EntryTransform.GetComponent<RectTransform>();
+        EntryRectTransform.anchoredPosition = new Vector2(0, -70 * transforms.Count);
+        EntryRectTransform.gameObject.SetActive(true);
+
+        int Rank = transforms.Count + 1;
+        string RankString;
+        switch (Rank)
+        {
+            default:
+                RankString = Rank + "TH"; break;
+            case 1: RankString = "1ST"; break;
+            case 2: RankString = "2ND"; break;
+            case 3: RankString = "3RD"; break;
+        }
+
+        EntryTransform.Find("placement").GetComponent<TMPro.TMP_Text>().text = RankString;
+
+        int atempts = attempts;
+
+        TMPro.TMP_Text atemptsText = EntryTransform.Find("atempts").GetComponent<TMPro.TMP_Text>();
+        TMPro.TMP_Text username = EntryTransform.Find("username").GetComponent<TMPro.TMP_Text>();
+
+        if (NoData)
+        {
+            atemptsText.text = "NO DATA";
+            username.text = "NO DATA";
+        }
+        else
+        {
+            atemptsText.text = atempts.ToString();
+            username.text = usernameFinal;
+        }
+
+        transforms.Add(EntryTransform);
     }
 
     private async void AddUserDataToScoreboard(Transform Scoreboard, string TargetLevel)
@@ -197,51 +214,5 @@ public class ScoreboardManager : MonoBehaviour
         }
         yield return new WaitForSecondsRealtime(1);
         AddedDataToScoreboard = false;
-    }
-
-
-    private void CreateHighscoreEntryTransform(int attempts, string usernameFinal, List<Transform> transforms, bool NoData, Transform Scoreboard)
-    {
-
-        Transform EntryTransform = Instantiate(ScoreboardElement, Scoreboard);
-        RectTransform EntryRectTransform = EntryTransform.GetComponent<RectTransform>();
-        EntryRectTransform.anchoredPosition = new Vector2(0, -70 * transforms.Count);
-        EntryRectTransform.gameObject.SetActive(true);
-
-        int Rank = transforms.Count + 1;
-        string RankString;
-        switch (Rank)
-        {
-            default:
-                RankString = Rank + "TH"; break;
-            case 1: RankString = "1ST"; break;
-            case 2: RankString = "2ND"; break;
-            case 3: RankString = "3RD"; break;
-        }
-
-        EntryTransform.Find("placement").GetComponent<TMPro.TMP_Text>().text = RankString;
-
-        int atempts = attempts;
-
-        TMPro.TMP_Text atemptsText = EntryTransform.Find("atempts").GetComponent<TMPro.TMP_Text>();
-        TMPro.TMP_Text username = EntryTransform.Find("username").GetComponent<TMPro.TMP_Text>();
-
-        if (NoData)
-        {
-            atemptsText.text = "NO DATA";
-            username.text = "NO DATA";
-        } else
-        {
-            atemptsText.text = atempts.ToString();
-            username.text = usernameFinal;
-        }
-
-        transforms.Add(EntryTransform);
-    }
-
-    private class ScoreboardEntry
-    {
-        public int atempts;
-        public string name;
     }
 }

@@ -54,19 +54,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public IEnumerator StartTransition(GameObject LastMenu, GameObject TargetMenu)
-    {
-        Transition.SetActive(true);
-        yield return new WaitForSecondsRealtime(2);
-        LastMenu.SetActive(false);
-        TargetMenu.SetActive(true);
-        yield return new WaitForSecondsRealtime(1);
-        Transition.SetActive(false);
-        CurrentGameObject = TargetMenu;
-
-        Debug.Log("LastMenu: " + LastMenu);
-    }
-
     private void LoadGame(GameObject level)
     {
         if (!isLoadingGame)
@@ -215,6 +202,48 @@ public class UIManager : MonoBehaviour
 
     }
 
+    private List<GameObject> FindAllObjectsInScene()
+    {
+        Scene activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+        GameObject[] rootObjects = activeScene.GetRootGameObjects();
+        GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+        List<GameObject> objectsInScene = new List<GameObject>();
+
+        for (int i = 0; i < rootObjects.Length; i++)
+        {
+            objectsInScene.Add(rootObjects[i]);
+        }
+
+        for (int i = 0; i < allObjects.Length; i++)
+        {
+            if (allObjects[i].transform.root)
+            {
+                for (int i2 = 0; i2 < rootObjects.Length; i2++)
+                {
+                    if (allObjects[i].transform.root == rootObjects[i2].transform && allObjects[i] != rootObjects[i2])
+                    {
+                        objectsInScene.Add(allObjects[i]);
+                        break;
+                    }
+                }
+            }
+        }
+        return objectsInScene;
+    }
+
+    public IEnumerator StartTransition(GameObject LastMenu, GameObject TargetMenu)
+    {
+        Transition.SetActive(true);
+        yield return new WaitForSecondsRealtime(2);
+        LastMenu.SetActive(false);
+        TargetMenu.SetActive(true);
+        yield return new WaitForSecondsRealtime(1);
+        Transition.SetActive(false);
+        CurrentGameObject = TargetMenu;
+
+        Debug.Log("LastMenu: " + LastMenu);
+    }
+
     public void OpenSettings()
     {
         if (IsBasicUser())
@@ -291,46 +320,7 @@ public class UIManager : MonoBehaviour
         IsInShop = true;
     }
 
-    private List<GameObject> FindAllObjectsInScene()
-    {
-        Scene activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-        GameObject[] rootObjects = activeScene.GetRootGameObjects();
-        GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
-        List<GameObject> objectsInScene = new List<GameObject>();
-
-        for (int i = 0; i < rootObjects.Length; i++)
-        {
-            objectsInScene.Add(rootObjects[i]);
-        }
-
-        for (int i = 0; i < allObjects.Length; i++)
-        {
-            if (allObjects[i].transform.root)
-            {
-                for (int i2 = 0; i2 < rootObjects.Length; i2++)
-                {
-                    if (allObjects[i].transform.root == rootObjects[i2].transform && allObjects[i] != rootObjects[i2])
-                    {
-                        objectsInScene.Add(allObjects[i]);
-                        break;
-                    }
-                }
-            }
-        }
-        return objectsInScene;
-    }
-
-    private void ChangeCurrentScoreboardContainer(string TargetScoreboard)
-    {
-        for (int i = 0; i < scoreboardManager.ScoreboardContainers.Count; i++)
-        {
-            if (scoreboardManager.ScoreboardContainers[i].name.Contains(TargetScoreboard))
-            {
-                scoreboardManager.CurrentContainer = scoreboardManager.ScoreboardContainers[i];
-                Debug.Log("Container: " + scoreboardManager.ScoreboardContainers[i].name);
-            }
-        }
-    }
+    
 
     private IEnumerator DisableScoreboards()
     {
@@ -347,13 +337,25 @@ public class UIManager : MonoBehaviour
     private IEnumerator StartScoreboardTransition(GameObject LastMenu, GameObject TargetMenu)
     {
         Transition.SetActive(true);
-        yield return new WaitForSecondsRealtime(2);
+        yield return new WaitForSecondsRealtime(1);
         StartCoroutine(DisableScoreboards());
         TargetMenu.SetActive(true);
         StartCoroutine(scoreboardManager.WaitForScoreboardUpdate());
-        yield return new WaitForSecondsRealtime(1);
+        yield return new WaitForSecondsRealtime(2);
         Transition.SetActive(false);
         CurrentGameObject = TargetMenu;
+    }
+
+    private void ChangeCurrentScoreboardContainer(string TargetScoreboard)
+    {
+        for (int i = 0; i < scoreboardManager.ScoreboardContainers.Count; i++)
+        {
+            if (scoreboardManager.ScoreboardContainers[i].name.Contains(TargetScoreboard))
+            {
+                scoreboardManager.CurrentContainer = scoreboardManager.ScoreboardContainers[i];
+                Debug.Log("Container: " + scoreboardManager.ScoreboardContainers[i].name);
+            }
+        }
     }
 
     public void OpenScoreboard(string TargetScoreboard)
