@@ -20,6 +20,7 @@ public class UIManager : MonoBehaviour
 
     public ScoreboardManager scoreboardManager;
     public FirebaseManager firebaseManager;
+    public UserManager userManager;
 
     public TMPro.TMP_Text CurrentSkin;
     public TMPro.TMP_Text Username;
@@ -50,7 +51,7 @@ public class UIManager : MonoBehaviour
 
         if(IsInShop)
         {
-            AddBuyFunctionToButton("PoxhYT");
+            AddBuyFunctionToButton(userManager.UserJSON().username);
         }
     }
 
@@ -86,7 +87,7 @@ public class UIManager : MonoBehaviour
 
     private IEnumerator SetupBuyButtons()
     {
-        AddBuyFunctionToButton("PoxhYT");
+        AddBuyFunctionToButton(userManager.UserJSON().username);
         yield return new WaitForSecondsRealtime(2);
         FoundButtons = true;
         Debug.Log("Finished: " + FoundButtons);
@@ -143,7 +144,7 @@ public class UIManager : MonoBehaviour
         {
             if (ButtonText.name.Contains("CUBE"))
             {
-                User user = await firebaseManager.GetUser("PoxhYT");
+                User user = await firebaseManager.GetUser(userManager.UserJSON().username);
                 foreach (SkinInfo skinFinal in user.skins)
                 {
                     if (skinFinal.skinname == ButtonText.name)
@@ -173,8 +174,7 @@ public class UIManager : MonoBehaviour
                 {
                     if (ButtonText.name.Contains("CUBE"))
                     {
-
-                        User user = await firebaseManager.GetUser("PoxhYT");
+                        User user = await firebaseManager.GetUser(userManager.UserJSON().username);
                         foreach (SkinInfo skinFinal in user.skins)
                         {
                             if (skinFinal.skinname == ButtonText.name)
@@ -246,7 +246,7 @@ public class UIManager : MonoBehaviour
 
     public void OpenSettings()
     {
-        if (IsBasicUser())
+        if (userManager.IsUserRegistered())
         {
             StartCoroutine(StartTransition(SelectionMenu, UsernameSettings));
         }
@@ -254,52 +254,6 @@ public class UIManager : MonoBehaviour
         {
             StartCoroutine(StartTransition(SelectionMenu, Settings));
         }
-    }
-
-    private string GetPath()
-    {
-        return Application.dataPath + "/StreamingAssets/user.json";
-    }
-
-    private User UserFromJSON()
-    {
-        string json = File.ReadAllText(GetPath());
-        Debug.Log(json);
-        return JsonUtility.FromJson<User>(json);
-    }
-
-    private bool IsBasicUser()
-    {
-        User user = UserFromJSON();
-        return user.username.Contains("Player");
-    }
-
-    public void ChangeUsername()
-    {
-        if(IsBasicUser())
-        {
-            User user = UserFromJSON();
-            user.username = Username.text;
-
-            Debug.Log(user.username);
-
-            string jsonUser = JsonUtility.ToJson(user);
-
-            File.Delete(GetPath());
-
-            File.WriteAllText(GetPath(), jsonUser);
-            Debug.Log("Changed username to: " + Username.text);
-        }
-        modalWindowManager.CloseWindow();
-        StartCoroutine(StartTransition(UsernameSettings, SelectionMenu));
-    }
-
-    public bool ChangedUsername()
-    {
-        string json = File.ReadAllText(GetPath());
-        Debug.Log("Json: " + json);
-        User user = JsonUtility.FromJson<User>(json);
-        return user.username == "Player";
     }
 
     public void OpenMenu(string TargetObject)
@@ -371,7 +325,6 @@ public class UIManager : MonoBehaviour
             {
                 if (gameObject.name == TargetScoreboard)
                 {
-                    Debug.Log(gameObject.name);
                     StartCoroutine(StartScoreboardTransition(scoreboardManager.CurrentContainer.gameObject, gameObject));
                 }
             }

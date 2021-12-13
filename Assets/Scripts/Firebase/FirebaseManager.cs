@@ -4,31 +4,41 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
+using Newtonsoft.Json;
 
 public class FirebaseManager : MonoBehaviour
 {
-
+    [SerializeField]
+    private List<Level> levels = new List<Level>(); 
 
     [SerializeField] TMPro.TMP_InputField username;
+
     [HideInInspector]
     public DatabaseReference reference;
 
+    public UserManager userManager;
+
     private void Start()
     {
-        reference = FirebaseDatabase.DefaultInstance.RootReference;
-    }
+        Debug.Log("HELLO!");
 
-    private async void test(string username, int atempts, int price)
-    {
-        User user = new User(username, 1000, new List<SkinInfo>(), new List<Level>());
-        user.levels.Add(new Level("LEVEL-01-FOREST", true, atempts));
-        user.levels.Add(new Level("LEVEL-01-HIGHWAY", true, atempts));
-        user.skins.Add(new SkinInfo("RED-CUBE", price, true));
-        string json = JsonUtility.ToJson(user);
+        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
+            var dependencyStatus = task.Result;
+            if (dependencyStatus == Firebase.DependencyStatus.Available)
+            {
+                // Create and hold a reference to your FirebaseApp,
+                // where app is a Firebase.FirebaseApp property of your application class.
+                reference = FirebaseDatabase.DefaultInstance.RootReference;
 
-        await reference.Child("users").Child(user.username).SetRawJsonValueAsync(json);
-        Debug.Log("Added " + username + " to the database");
+                // Set a flag here to indicate whether Firebase is ready to use by your app.
+            }
+            else
+            {
+                UnityEngine.Debug.LogError(System.String.Format(
+                  "Could not resolve all Firebase dependencies: {0}", dependencyStatus));
+                // Firebase Unity SDK is not safe to use here.
+            }
+        });
     }
 
     public async void AddUserToDatabase(string username)
@@ -37,9 +47,7 @@ public class FirebaseManager : MonoBehaviour
 
         if (!UserInDatabase)
         {
-            User user = new User(username, 1000, new List<SkinInfo>(), new List<Level>());
-            user.levels.Add(new Level("LEVEL-01-FOREST", true, 0));
-            user.skins.Add(new SkinInfo("RED-CUBE", 0, true));
+            User user = userManager.initializeUser(username);
             string json = JsonUtility.ToJson(user);
 
             try
@@ -77,12 +85,13 @@ public class FirebaseManager : MonoBehaviour
     {
         var task = await reference.Child("users").Child(username).GetValueAsync();
         DataSnapshot snapshot = task;
+        Debug.Log(snapshot);
         return snapshot.Child("username").Value != null;
     }
 
     public async void UpdateUser(string username, string path, string json)
     {
-        await reference.Child("users").Child(username).Child("skins").SetRawJsonValueAsync(json);
+        await reference.Child("users").Child(username).Child(path).SetRawJsonValueAsync(json);
         Debug.Log("Updated user!");
     }
 
@@ -90,5 +99,31 @@ public class FirebaseManager : MonoBehaviour
     {
         var task = await reference.Child("users").GetValueAsync();
         return task;
+    }
+
+    public async void UpdateUserLevelAttempt(string username, string currentLevel)
+    {
+        var user = await GetUser(username);
+        List<Level> levelList = user.levels;
+
+        for (int i = 0; i < levelList.Count; i++)
+        {
+            Level level = levelList[i];
+            if(level.levelname.Contains(currentLevel))
+            {
+                levels.Add(level);
+
+                Debug.Log("OLD: " + level.attempts);
+                level.attempts++;
+                Debug.Log("NEW: " + level.attempts);
+
+                string json = JsonConvert.SerializeObject(levelList);
+                Debug.Log("--------------------");
+                Debug.Log(json);
+                Debug.Log("--------------------");
+
+                UpdateUser(username, "levels", json);
+            }
+        }
     }
 }

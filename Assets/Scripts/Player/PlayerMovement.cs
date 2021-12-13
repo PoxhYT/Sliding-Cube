@@ -41,7 +41,7 @@ public class PlayerMovement : MonoBehaviour
         startGame();
         progress.text = gameManager.GetCurrentProgress(rb, endPosition, fullDistance).ToString() + "%";
 
-        if(rb.position.y < 0)
+        if (rb.position.y < 0)
         {
             gameManager.EndGame();
         }
