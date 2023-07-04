@@ -5,7 +5,7 @@ public class GameManager : MonoBehaviour
 {
     public void endGame(GameObject player)
     {
-        Destroy(player);
+        player.GetComponentInChildren<Renderer>().enabled = false;
     }
 
     public void StartNextLevel()
