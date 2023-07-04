@@ -5,11 +5,13 @@ using UnityEngine;
 
 public class PlayerCollisionDetection : MonoBehaviour
 {
+    public GameObject player;
+
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.collider.CompareTag("Obstacle"))
         {
-            Debug.Log("DIE");     
+            FindObjectOfType<GameManager>().endGame(player);
         } 
     }
 }
