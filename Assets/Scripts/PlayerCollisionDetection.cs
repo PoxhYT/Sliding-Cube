@@ -5,8 +5,11 @@ using UnityEngine;
 
 public class PlayerCollisionDetection : MonoBehaviour
 {
-    private void OnCollisionEnter(Collision other)
+    private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("dsad");    
+        if (collision.collider.CompareTag("Obstacle"))
+        {
+            Debug.Log("DIE");     
+        } 
     }
 }
