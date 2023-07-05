@@ -20,9 +20,12 @@ public class ScoreManager : MonoBehaviour
 
     private void Update()
     {
-        float distanceTravelled = Vector3.Distance(player.position, platformStart);
-        float rawProgress = (distanceTravelled / totalLength) * 100;
-        float progress = Mathf.Min(rawProgress, 100);
-        scoreText.text = $"{progress:0.00}%";
+        if (player)
+        {
+            float distanceTravelled = Vector3.Distance(player.position, platformStart);
+            float rawProgress = (distanceTravelled / totalLength) * 100;
+            float progress = Mathf.Min(rawProgress, 100);
+            scoreText.text = $"{progress:0.00}%";
+        }
     }
 }

@@ -7,10 +7,6 @@ public class LevelComplete : MonoBehaviour
         if (Input.anyKeyDown)
         {
             GameManager gameManager = FindAnyObjectByType<GameManager>();
-            if (gameManager != null)
-            {
-                gameManager.StartNextLevel();
-            }
         }
     }
 }
