@@ -4,10 +4,19 @@ using UnityEngine;
 public class AudioManager : MonoBehaviour
 {
     public AudioLowPassFilter lowPassFilter;
+    public static AudioManager instance;
 
     private void Awake()
     {
-        DontDestroyOnLoad(this);
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     public void FadeToNormal(float delay, float normalCutoffFrequency, float fadeDuration)
