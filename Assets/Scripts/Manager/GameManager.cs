@@ -4,17 +4,32 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public Rigidbody playerRigidbody;
+    private Rigidbody _playerRigidbody;
+    private AudioManager _audioManager;
+    
+    private void Start()
+    {
+        _playerRigidbody = FindObjectOfType<Rigidbody>();
+        _audioManager = FindObjectOfType<AudioManager>();
+    }
 
     public void StartNextLevel()
     {
-        int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
+        int nextSceneIndex = SceneManager.GetActiveScene().buildIndex +1;
         if (nextSceneIndex < SceneManager.sceneCountInBuildSettings) SceneManager.LoadScene(nextSceneIndex);
+    }
+    
+    public void StartPreviousLevel()
+    {
+        int nextSceneIndex = SceneManager.GetActiveScene().buildIndex -1;
+        if (nextSceneIndex >= 0) SceneManager.LoadScene(nextSceneIndex);
     }
     
     public void FinishLevel()
     {
-        StartCoroutine(FreezePlayerCoroutine());
+        _playerRigidbody.constraints = RigidbodyConstraints.FreezePosition;
+        FindObjectOfType<ScreenTransition>().StartTransition(false);
+        _audioManager.FadeToMuffled(0, 300.0f, 2);
     }
     
     public void EndGame(GameObject player, GameObject LevelProgressUI)
@@ -23,13 +38,7 @@ public class GameManager : MonoBehaviour
         StartCoroutine(RestartLevelCoroutine());
         LevelProgressUI.SetActive(false);
     }
-    
-    IEnumerator FreezePlayerCoroutine()
-    {
-        yield return new WaitForSeconds(2f);
-        playerRigidbody.constraints = RigidbodyConstraints.FreezePosition;
-    }
-    
+
     IEnumerator RestartLevelCoroutine()
     {
         yield return new WaitForSeconds(2f);

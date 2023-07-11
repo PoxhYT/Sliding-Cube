@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class LevelComplete : MonoBehaviour
 {
-    void Update()
+    private void Update()
     {
-        if (Input.anyKeyDown)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            GameManager gameManager = FindAnyObjectByType<GameManager>();
+            FindObjectOfType<GameManager>().FinishLevel();
         }
     }
 }
