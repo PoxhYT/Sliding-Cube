@@ -13,6 +13,9 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 
+Assets\Scenes\Level01.unity
+Assets\Fonts\Roboto\Roboto-Thin SDF.asset
+
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/
