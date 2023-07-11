@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 69222950}
   - component: {fileID: 69222949}
   m_Layer: 0
-  m_Name: Ground
+  m_Name: Groun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
